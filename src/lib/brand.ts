@@ -9,7 +9,7 @@ export const brand = {
     "Book a trusted local concierge for errands, rides, pet visits, home checks and everyday help in New Westminster and Burnaby.",
   // Placeholder contact details. Replace before launch.
   phone: "604-555-0142",
-  email: "hello@royalcityconcierge.ca",
+  email: "hello@royalcityconcierge.com",
   hours: "Mon–Sat, 8 am – 6 pm",
   // Business time zone. All calendars are shown in this zone.
   timeZone: "America/Vancouver",
