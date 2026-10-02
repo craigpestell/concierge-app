@@ -51,16 +51,16 @@ Open times come from the concierge's weekly hours, minus existing bookings and t
 
 Everything runs on a single droplet from `docker-compose.yml`. Postgres is only reachable inside Docker, and the firewall allows SSH, HTTP and HTTPS. Pushing to `main` builds the image to GitHub Container Registry and deploys it (`.github/workflows/deploy.yml`). The deploy also prepares a fresh droplet with `deploy/setup-droplet.sh`.
 
-1. Create an Ubuntu 24.04 droplet (Basic, 1 GB, Toronto), with an SSH key whose private half you'll give to GitHub. Turn on weekly droplet backups if you want off-server copies.
-2. In the repo's **Settings, Secrets and variables, Actions**, add:
-   - `DROPLET_HOST`: the droplet's IP address
-   - `DROPLET_SSH_KEY`: the private SSH key for root
-   - `POSTGRES_PASSWORD`: a long random string (`openssl rand -hex 24`). Keep it the same forever, because it's set when the database is first created.
-   - `APP_URL`: `http://<droplet IP>` at first, then `https://yourdomain`
-   - `SITE_ADDRESS`: `:80` at first, then `yourdomain, www.yourdomain`
-   - `ADMIN_EMAILS`: comma-separated admin emails
-   - `RESEND_API_KEY`: optional until email is set up
-3. Run the **Deploy** workflow (Actions tab, or push to `main`). Check `http://<droplet IP>/api/health` shows `{"ok":true}`.
+1. With `doctl` signed in (`doctl auth init`) and, ideally, `gh` signed in, run:
+   ```sh
+   ./deploy/create-droplet.sh
+   ```
+   It creates the deploy SSH key, the droplet (`deploy/droplet.env`, first-boot setup in `deploy/cloud-init.yaml`) and a cloud firewall that allows only SSH, HTTP and HTTPS. It then stores the deploy settings as GitHub secrets and starts the Deploy workflow. Running it again changes nothing that already exists. Without `gh`, it prints the secrets to add by hand:
+   - `DROPLET_HOST`, `DROPLET_SSH_KEY`: the droplet's IP and the private deploy key
+   - `POSTGRES_PASSWORD`: random. Set it once and never change it, because it's fixed when the database is created.
+   - `APP_URL` (`http://<droplet IP>` at first), `SITE_ADDRESS` (`:80` at first), `ADMIN_EMAILS`, and optionally `RESEND_API_KEY`
+2. Pushing to `main` deploys from then on. Check `http://<droplet IP>/api/health` shows `{"ok":true}`.
+3. To create it by hand instead: an Ubuntu 24.04 droplet, Basic 1 GB in Toronto, with the deploy SSH key. Then add the secrets above and run the Deploy workflow from the Actions tab.
 4. Domain: in Cloudflare, add proxied A records for the domain and `www` pointing to the droplet IP, and set SSL to Full (strict). Update `APP_URL` and `SITE_ADDRESS` and deploy again. Caddy gets the HTTPS certificate on its own.
 5. Caching, when you turn it on: cache `/_next/static/*` and images, and bypass `/api/*`, `/auth/*`, `/account*`, `/concierge*`, `/admin*`, `/join`, `/signin` and any request with a `session` cookie.
 
