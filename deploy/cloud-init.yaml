@@ -1,0 +1,15 @@
+#cloud-config
+# First-boot setup for the droplet. deploy/setup-droplet.sh repeats these steps
+# on every deploy, so a droplet made another way ends up the same.
+package_update: true
+packages:
+  - ca-certificates
+  - curl
+
+swap:
+  filename: /swapfile
+  size: 2147483648  # 2 GB
+
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - mkdir -p /opt/concierge/deploy /opt/concierge/backups

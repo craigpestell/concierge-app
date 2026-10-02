@@ -1,0 +1,7 @@
+# SITE_ADDRESS is ":80" until the domain points here. Set it to the domain
+# (for example "royalcityconcierge.ca, www.royalcityconcierge.ca") and Caddy gets
+# HTTPS certificates automatically, which works with Cloudflare's Full (strict) mode.
+{$SITE_ADDRESS}
+
+encode zstd gzip
+reverse_proxy app:3000
