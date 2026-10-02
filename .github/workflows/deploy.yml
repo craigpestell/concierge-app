@@ -80,7 +80,7 @@ jobs:
             echo "SITE_ADDRESS=${SITE_ADDRESS:-:80}"
             echo "ADMIN_EMAILS=${ADMIN_EMAILS}"
             echo "RESEND_API_KEY=${RESEND_API_KEY}"
-            echo "EMAIL_FROM=Royal City Concierge <hello@royalcityconcierge.ca>"
+            echo "EMAIL_FROM=Royal City Concierge <hello@royalcityconcierge.com>"
           } > .env.deploy
           scp .env.deploy root@"$HOST":/opt/concierge/.env
           ssh root@"$HOST" 'chmod 600 /opt/concierge/.env'
