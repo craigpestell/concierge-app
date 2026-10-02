@@ -1,0 +1,40 @@
+# DigitalOcean App Platform spec. Create the app with:
+#   doctl apps create --spec .do/app.yaml
+# then set the secret values (RESEND_API_KEY) in the App Platform console.
+name: concierge-app
+region: tor
+services:
+  - name: web
+    github:
+      repo: craigpestell/concierge-app
+      branch: main
+      deploy_on_push: true
+    environment_slug: node-js
+    build_command: npm run build
+    run_command: npm run db:deploy && npm start
+    http_port: 3000
+    instance_size_slug: apps-s-1vcpu-1gb
+    instance_count: 1
+    health_check:
+      http_path: /api/health
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: ${db.DATABASE_URL}
+      - key: APP_URL
+        scope: RUN_TIME
+        value: ${APP_URL}
+      - key: ADMIN_EMAILS
+        scope: RUN_TIME
+        value: ""
+      - key: EMAIL_FROM
+        scope: RUN_TIME
+        value: "Royal City Concierge <hello@royalcityconcierge.ca>"
+      - key: RESEND_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    production: false
