@@ -28,23 +28,23 @@ Draft, updated 2026-10-02. Customers browse individual concierge profiles and bo
 
 ## Stack (DigitalOcean)
 
-- **App:** Next.js (TypeScript), deployed on DigitalOcean App Platform from a GitHub repo
-- **Database:** DigitalOcean Managed PostgreSQL, accessed through Prisma
+- **App:** Next.js (TypeScript), in Docker on one DigitalOcean droplet, deployed from GitHub Actions
+- **Database:** PostgreSQL in Docker on the same droplet (moving to a managed cluster later is a `DATABASE_URL` change), accessed through Prisma
 - **Sign-in:** email magic links (Auth.js), with no passwords to manage
 - **Photos:** DigitalOcean Spaces
 - **Email:** Postmark or Resend for confirmations and reminders
 - **Payments:** none at first. Concierges invoice after visits. Stripe can come in phase 2.
-- **Rough cost:** App Platform about $5 to $12 a month, plus managed Postgres from about $15 a month, plus Spaces at $5 a month, plus email (free tier to start)
+- **Rough cost:** one 1 GB droplet at about US$6 a month (plus US$1.20 for weekly droplet backups), plus email (free tier to start)
 
 ## DNS and caching (Cloudflare)
 
-- **DNS:** the domain's nameservers point to Cloudflare. A proxied CNAME for the root and `www` points to the App Platform app's `ondigitalocean.app` address, and the custom domain is added in App Platform as well.
-- **TLS:** Cloudflare SSL mode set to Full (strict). App Platform issues its own certificate, and the domain must be added there before proxying is turned on so validation succeeds.
+- **DNS:** the domain's nameservers point to Cloudflare. Proxied A records for the root and `www` point to the droplet's IP.
+- **TLS:** Cloudflare SSL mode set to Full (strict). Caddy on the droplet gets its own certificate automatically.
 - **Caching, later:**
   - Cache static assets (`/_next/static/*`, images, fonts) for a long time. Next.js file names change with every deploy.
   - Bypass the cache for `/api/*`, `/book/*`, `/account/*`, `/concierge/*` (dashboard), `/admin/*`, `/auth/*`, and any request that carries a session cookie.
   - Public pages (home, services, concierge profiles) can be cached for a short time, but never the calendars on them. Open times are loaded live from `/api`.
-  - Purge the Cloudflare cache after each deploy, through the deploy job or a Cloudflare API token stored as an App Platform secret.
+  - Purge the Cloudflare cache after each deploy, through the deploy job or a Cloudflare API token stored as a GitHub Actions secret.
 - **Real visitor IPs:** the app reads `CF-Connecting-IP` for rate limiting on booking and sign-in.
 
 ## Phases
