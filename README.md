@@ -49,10 +49,11 @@ Open times come from the concierge's weekly hours, minus existing bookings and t
 
 ## Deploying (DigitalOcean + Cloudflare)
 
-1. Create the app from `.do/app.yaml` (`doctl apps create --spec .do/app.yaml`, or in the console). It adds a managed Postgres database, and migrations run on each start.
-2. Set `APP_URL` to the public URL, `ADMIN_EMAILS`, and the `RESEND_API_KEY` secret.
-3. Add the custom domain in App Platform first. Then, in Cloudflare, add a proxied CNAME to the app's `ondigitalocean.app` hostname and set SSL to Full (strict).
-4. Caching, when you turn it on: cache `/_next/static/*` and images, and bypass `/api/*`, `/auth/*`, `/account*`, `/concierge*`, `/admin*`, `/join`, `/signin` and any request with a `session` cookie.
+1. Create a managed PostgreSQL cluster named `concierge-db` in Toronto (tor1). The smallest Basic size is enough to start.
+2. Create the app from `.do/app.yaml` (`doctl apps create --spec .do/app.yaml`, or paste the spec into the console). It attaches `concierge-db`, and migrations run on each start. The migrations also add the starting list of services.
+3. Set `APP_URL` to the public URL, `ADMIN_EMAILS`, and the `RESEND_API_KEY` secret.
+4. Add the custom domain in App Platform first. Then, in Cloudflare, add a proxied CNAME to the app's `ondigitalocean.app` hostname and set SSL to Full (strict).
+5. Caching, when you turn it on: cache `/_next/static/*` and images, and bypass `/api/*`, `/auth/*`, `/account*`, `/concierge*`, `/admin*`, `/join`, `/signin` and any request with a `session` cookie.
 
 ## Not built yet
 

@@ -1,6 +1,9 @@
-# DigitalOcean App Platform spec. Create the app with:
-#   doctl apps create --spec .do/app.yaml
-# then set the secret values (RESEND_API_KEY) in the App Platform console.
+# DigitalOcean App Platform spec.
+# 1. Create a managed PostgreSQL cluster named "concierge-db" in Toronto (tor1).
+# 2. Create the app with: doctl apps create --spec .do/app.yaml
+#    (or paste this file into the console under App > Settings > App Spec).
+# 3. Set ADMIN_EMAILS and the RESEND_API_KEY secret in the console.
+# Migrations run on every start and also add the starting list of services.
 name: concierge-app
 region: tor
 services:
@@ -34,7 +37,10 @@ services:
         scope: RUN_TIME
         type: SECRET
 databases:
+  # The existing managed cluster. Attaching it here also adds the app as a trusted source.
   - name: db
     engine: PG
-    version: "16"
-    production: false
+    production: true
+    cluster_name: concierge-db
+    db_name: defaultdb
+    db_user: doadmin
