@@ -1,5 +1,7 @@
 # Concierge booking app: plan
 
+> **Update 2026-10-22:** Michelle doesn't want other concierges. The public site now promotes only her, and customers book from her one calendar at `/book`. Concierge sign-up is admin-only. The multi-concierge parts below describe the original plan.
+
 Draft, updated 2026-10-02. Customers browse individual concierge profiles and book directly from each concierge's own calendar. The brand name isn't settled, so it lives in one config value and can be swapped.
 
 ## Who uses it

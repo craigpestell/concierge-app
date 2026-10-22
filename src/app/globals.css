@@ -227,3 +227,8 @@ td.num { font-variant-numeric: tabular-nums; }
 .check input { width: auto; padding: 0; margin: 0; accent-color: var(--brass); }
 .check { align-items: flex-start; }
 .check input { margin-top: 0.3em; }
+
+/* Meet the concierge (home page) */
+.meet { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(1.4rem, 4vw, 3rem); align-items: start; max-width: 860px; }
+.meet .bio { white-space: pre-line; color: var(--ink-soft); }
+@media (max-width: 620px) { .meet { grid-template-columns: minmax(0, 1fr); } }

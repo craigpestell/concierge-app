@@ -21,7 +21,7 @@ export function ProfileFields({ services, d = {} }: { services: Service[]; d?: D
         </div>
         <div className="field">
           <label htmlFor="rate">Hourly rate ($)</label>
-          <input id="rate" name="rate" type="number" min={20} max={200} step={1} defaultValue={(d.hourlyRateCents ?? 3500) / 100} required />
+          <input id="rate" name="rate" type="number" min={20} max={200} step={1} defaultValue={(d.hourlyRateCents ?? 5000) / 100} required />
         </div>
       </div>
       <div className="field">

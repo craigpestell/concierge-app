@@ -144,7 +144,7 @@ export default async function ConciergeDashboard({ searchParams }: { searchParam
             <p className="eyebrow">My schedule</p>
             <h1 style={{ fontSize: "var(--step-3)" }}>{full.displayName}</h1>
           </div>
-          {full.approved && full.visible && <Link className="btn btn-ghost btn-sm" href={`/concierges/${full.slug}`}>View my public profile</Link>}
+          {full.approved && full.visible && <Link className="btn btn-ghost btn-sm" href="/book">View my booking page</Link>}
         </div>
 
         {!full.approved && (

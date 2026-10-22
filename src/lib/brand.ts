@@ -3,10 +3,10 @@ export const brand = {
   name: "Royal City Concierge",
   shortName: "Royal City",
   monogram: "RC",
-  tagline: "Life gets busy. We can help.",
+  tagline: "Your time, thoughtfully handled.",
   area: "New Westminster & Burnaby",
   description:
-    "Book a trusted local concierge for errands, rides, pet visits, home checks and everyday help in New Westminster and Burnaby.",
+    "A bespoke personal concierge in New Westminster and Burnaby. One dedicated person for errands, appointments, home and pet care, and the details that fill your week.",
   // Placeholder contact details. Replace before launch.
   phone: "604-555-0142",
   email: "hello@royalcityconcierge.com",
