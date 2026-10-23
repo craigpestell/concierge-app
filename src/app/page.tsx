@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { brand } from "@/lib/brand";
 import { db } from "@/lib/db";
-import { ConciergeCard, conciergeCardInclude } from "@/components/ConciergeCard";
+import { money } from "@/lib/format";
+import { getOwner, firstName } from "@/lib/owner";
+import { Avatar } from "@/components/Avatar";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const featured = await db.conciergeProfile.findMany({
-    where: { approved: true, visible: true },
-    include: conciergeCardInclude,
-    orderBy: { createdAt: "asc" },
-    take: 3,
-  });
-  const services = await db.service.findMany({ where: { active: true }, orderBy: { sort: "asc" } });
+  const [owner, services] = await Promise.all([
+    getOwner(),
+    db.service.findMany({ where: { active: true }, orderBy: { sort: "asc" } }),
+  ]);
+  const name = owner ? firstName(owner.displayName) : null;
 
   return (
     <>
@@ -21,16 +21,16 @@ export default async function Home() {
           <div>
             <p className="eyebrow">Personal concierge · {brand.area}</p>
             <h1 id="hero-title">
-              Life gets busy.<br />
-              <em>We can help.</em>
+              Your time,<br />
+              <em>thoughtfully handled.</em>
             </h1>
             <p className="lede">
-              Choose a local concierge, see their calendar and book a time. Errands, rides, pet visits, home checks and the
-              small jobs that pile up.
+              A bespoke personal concierge for people who want one dependable person to rely on. Errands, appointments,
+              home and pet care, and the details that fill your week, done properly and with discretion.
             </p>
             <div className="actions" style={{ marginTop: "2rem" }}>
-              <Link className="btn" href="/concierges">Find a concierge</Link>
-              <Link className="btn btn-ghost" href="/concierges?service=visit-for-a-parent">Help for an aging parent</Link>
+              <Link className="btn" href="/book">{name ? `Book ${name}` : "Book a time"}</Link>
+              <Link className="btn btn-ghost" href="/#meet">{name ? `Meet ${name}` : "How it works"}</Link>
             </div>
           </div>
           <div className="keytag-stage" aria-hidden="true">
@@ -50,19 +50,27 @@ export default async function Home() {
         </div>
       </div>
 
-      <section className="section" aria-labelledby="featured-title">
+      <section className="section" id="meet" aria-labelledby="meet-title">
         <div className="wrap">
-          <div className="section-head">
-            <p className="eyebrow">Our concierges</p>
-            <h2 id="featured-title">Pick the person, then the time</h2>
-            <p>Every concierge has their own profile and calendar, so you know exactly who is coming.</p>
-          </div>
-          {featured.length ? (
-            <div className="cards">{featured.map((c) => <ConciergeCard key={c.id} c={c} />)}</div>
+          {owner ? (
+            <div className="meet">
+              <Avatar name={owner.displayName} photoUrl={owner.photoUrl} large />
+              <div className="stack">
+                <p className="eyebrow">Your concierge</p>
+                <h2 id="meet-title">Meet {owner.displayName}</h2>
+                {owner.headline && <p className="lede" style={{ fontSize: "var(--step-0)" }}>{owner.headline}</p>}
+                {owner.bio && <p className="bio">{owner.bio}</p>}
+                <p className="rate">{money(owner.hourlyRateCents)}/hour · paid after the visit</p>
+                <div><Link className="btn" href="/book">See open times</Link></div>
+              </div>
+            </div>
           ) : (
-            <p className="empty">Concierge profiles will appear here once they're approved.</p>
+            <div className="section-head">
+              <p className="eyebrow">Your concierge</p>
+              <h2 id="meet-title">One person, every time</h2>
+              <p>You won't be passed between helpers. The same dependable person learns your preferences and looks after you.</p>
+            </div>
           )}
-          <div style={{ marginTop: "1.6rem" }}><Link className="btn btn-ghost" href="/concierges">See all concierges</Link></div>
         </div>
       </section>
 
@@ -70,12 +78,12 @@ export default async function Home() {
         <div className="wrap">
           <div className="section-head">
             <p className="eyebrow">How it works</p>
-            <h2 id="how-title">Three steps, then it's off your plate</h2>
+            <h2 id="how-title">Three steps, then it's off your mind</h2>
           </div>
           <div className="steps">
-            <div className="step"><span className="step-n">1</span><h3>Choose a concierge</h3><p>Browse profiles by service and area, and read who they are.</p></div>
-            <div className="step"><span className="step-n">2</span><h3>Book from their calendar</h3><p>Pick a service, how long you need and an open time. You get a confirmation by email right away.</p></div>
-            <div className="step"><span className="step-n">3</span><h3>Consider it done</h3><p>Your concierge takes care of it and sends a short note when they're finished. You pay after the visit.</p></div>
+            <div className="step"><span className="step-n">1</span><h3>Pick a time</h3><p>Choose what you need, how long and an open time on {name ? `${name}'s` : "the"} calendar.</p></div>
+            <div className="step"><span className="step-n">2</span><h3>Share the details</h3><p>Add notes, preferences and access instructions. You get a confirmation by email right away.</p></div>
+            <div className="step"><span className="step-n">3</span><h3>Consider it done</h3><p>{name ?? "Your concierge"} takes care of it personally and sends a short note when it's finished. You pay after the visit.</p></div>
           </div>
         </div>
       </section>
@@ -83,7 +91,7 @@ export default async function Home() {
       <section className="section" aria-labelledby="limits-title">
         <div className="wrap stack" style={{ maxWidth: 780 }}>
           <p className="eyebrow">Good to know</p>
-          <h2 id="limits-title">What our concierges don't do</h2>
+          <h2 id="limits-title">What isn't included</h2>
           <p className="muted">To keep things clear and safe, this is a non-medical service. For these, we'll point you to the right professional.</p>
           <ul className="not-list">
             <li>Personal or medical care</li><li>Giving medications</li><li>Childcare</li><li>Licensed trades or major repairs</li>

@@ -104,7 +104,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 <tbody>
                   {concierges.map((c) => (
                     <tr key={c.id}>
-                      <td>{c.approved && c.visible ? <Link href={`/concierges/${c.slug}`}>{c.displayName}</Link> : c.displayName}<div className="muted small">{c.headline}</div></td>
+                      <td>{c.approved && c.visible ? <Link href="/book">{c.displayName}</Link> : c.displayName}<div className="muted small">{c.headline}</div></td>
                       <td>{c.user.email}</td>
                       <td className="num">{money(c.hourlyRateCents)}</td>
                       <td className="num">{c._count.bookings}</td>
@@ -122,7 +122,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               </table>
             </div>
           ) : (
-            <p className="muted">No concierges yet. Share the <Link href="/join">sign-up page</Link> with the people you're hiring.</p>
+            <p className="muted">No profile yet. <Link href="/join">Set up your profile</Link> to open your calendar.</p>
           )}
         </div>
 

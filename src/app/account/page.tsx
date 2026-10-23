@@ -55,7 +55,7 @@ export default async function AccountPage() {
                       <tr key={b.id}>
                         <td>{whenLabel(b.start, b.end)}<div className="muted small">{b.address}</div></td>
                         <td>{b.service.name}</td>
-                        <td><Link href={`/concierges/${b.concierge.slug}`}>{b.concierge.displayName}</Link></td>
+                        <td>{b.concierge.displayName}</td>
                         <td className="num">{money(b.priceCents)}</td>
                         <td>
                           <form action={cancel}>
@@ -71,7 +71,7 @@ export default async function AccountPage() {
               </table>
             </div>
           ) : (
-            <p className="muted">No upcoming bookings. <Link href="/concierges">Book a concierge</Link>.</p>
+            <p className="muted">No upcoming bookings. <Link href="/book">Book a time</Link>.</p>
           )}
         </div>
 

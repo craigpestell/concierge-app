@@ -1,6 +1,6 @@
 # Royal City Concierge
 
-Booking site for a personal concierge service in New Westminster and Burnaby. Customers browse concierge profiles and book a time from each concierge's own calendar. Concierges manage their hours, time off and bookings. An admin approves new concierges and can reassign or cancel bookings.
+Booking site for Michelle's bespoke personal concierge service in New Westminster and Burnaby. The site promotes one person: customers read about her and book a time from her calendar at `/book`. She manages her hours, time off and bookings. The database still supports several concierge profiles, but the public site shows only the first approved one.
 
 The brand name, contact details, time zone and booking rules all live in `src/lib/brand.ts`.
 
@@ -36,10 +36,10 @@ npm run build
 | Path | Who | What |
 |---|---|---|
 | `/` | Everyone | Home page |
-| `/concierges` | Everyone | Directory, filtered by service and area |
-| `/concierges/[slug]` | Everyone | Profile and booking calendar |
+| `/book` | Everyone | Michelle's profile and booking calendar |
+| `/concierges`, `/concierges/[slug]` | Everyone | Old links; redirect to `/book` |
 | `/account` | Customers | Upcoming and past bookings, cancel |
-| `/join` | Anyone signed in | Apply to be a concierge |
+| `/join` | Admins | Set up the owner's profile (published right away) |
 | `/concierge` | Concierges | Bookings, weekly hours, time off, profile |
 | `/admin` | Admins | Approve concierges, reassign or cancel bookings, manage services |
 
