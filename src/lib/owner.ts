@@ -15,3 +15,8 @@ export function getOwner() {
 export function firstName(displayName: string) {
   return displayName.split(" ")[0]!;
 }
+
+/** Her profile whether or not it's currently taking bookings, for the admin page. */
+export function getOwnerProfile() {
+  return db.conciergeProfile.findFirst({ orderBy: { createdAt: "asc" } });
+}
