@@ -10,12 +10,12 @@ export const metadata: Metadata = { title: "Set up your profile" };
 
 const DEFAULT_HOURS = [1, 2, 3, 4, 5].map((weekday) => ({ weekday, startMin: 9 * 60, endMin: 17 * 60 }));
 
-async function apply(formData: FormData) {
+async function setUp(formData: FormData) {
   "use server";
-  const user = await requireUser(["ADMIN"], "/join");
+  const user = await requireUser(["ADMIN"], "/concierge/setup");
   if (user.profile) redirect("/concierge");
   const read = readProfileForm(formData);
-  if ("error" in read) redirect(`/join?error=${encodeURIComponent(read.error)}`);
+  if ("error" in read) redirect(`/concierge/setup?error=${encodeURIComponent(read.error)}`);
   const v = read.value;
   const slug = await uniqueSlug(v.displayName);
   await db.$transaction([
@@ -38,8 +38,8 @@ async function apply(formData: FormData) {
   redirect("/concierge");
 }
 
-export default async function JoinPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const user = await requireUser(["ADMIN"], "/join");
+export default async function SetupPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const user = await requireUser(["ADMIN"], "/concierge/setup");
   if (user.profile) redirect("/concierge");
   const { error } = await searchParams;
   const services = await db.service.findMany({ where: { active: true }, orderBy: { sort: "asc" } });
@@ -51,7 +51,7 @@ export default async function JoinPage({ searchParams }: { searchParams: Promise
         <p className="muted">
           This is what clients see when they book you on {brand.name}. You'll start with weekday hours of 9 to 5, which you can change from your schedule page.
         </p>
-        <form action={apply} className="form panel">
+        <form action={setUp} className="form panel">
           <ProfileFields services={services} d={{ displayName: user.name }} />
           {error && <p className="error">{error}</p>}
           <div><button className="btn" type="submit">Publish my profile</button></div>

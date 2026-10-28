@@ -5,6 +5,8 @@ export const brand = {
   monogram: "RC",
   tagline: "Your time, thoughtfully handled.",
   area: "New Westminster & Burnaby",
+  // Shown when her profile isn't set up yet; otherwise the profile's name is used.
+  ownerName: "Michelle",
   description:
     "A bespoke personal concierge in New Westminster and Burnaby. One dedicated person for errands, appointments, home and pet care, and the details that fill your week.",
   // Placeholder contact details. Replace before launch.

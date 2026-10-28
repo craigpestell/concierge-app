@@ -25,7 +25,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <span className="brand-name">{brand.name}</span>
             </Link>
             <nav className="nav" aria-label="Main">
-              <Link className="hide-sm" href="/#how">How it works</Link>
+              <Link className="hide-sm" href="/#services">Services</Link>
+              <Link className="hide-sm" href="/#families">For families</Link>
+              <Link className="hide-sm" href="/#rates">Rates</Link>
+              <Link className="hide-sm" href="/#faq">FAQ</Link>
               {user ? (
                 <>
                   {user.profile && <Link href="/concierge">My schedule</Link>}
@@ -35,7 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               ) : (
                 <Link href="/signin">Sign in</Link>
               )}
-              <Link className="btn btn-sm" href="/book">Book a time</Link>
+              <Link className="btn btn-sm" href="/#book">Book a time</Link>
             </nav>
           </div>
         </header>
@@ -43,7 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <footer className="site-footer">
           <div className="wrap">
             <span className="brand-name">{brand.name}</span>
-            <span>Bespoke personal concierge · {brand.area}, BC</span>
+            <span>Personal concierge &amp; everyday help · {brand.area}, BC</span>
             <span>Non-medical services only</span>
           </div>
         </footer>

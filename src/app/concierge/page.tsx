@@ -20,7 +20,7 @@ const TIMES = Array.from({ length: 31 }, (_, i) => 6 * 60 + i * 30); // 6 am to 
 
 async function myProfile() {
   const user = await requireUser(undefined, "/concierge");
-  if (!user.profile) redirect("/join");
+  if (!user.profile) redirect(user.role === "ADMIN" ? "/concierge/setup" : "/");
   return { user, profile: user.profile };
 }
 
@@ -120,7 +120,7 @@ async function saveProfile(f: FormData) {
   redirect("/concierge?saved=profile#profile");
 }
 
-export default async function ConciergeDashboard({ searchParams }: { searchParams: Promise<{ error?: string; saved?: string; welcome?: string }> }) {
+export default async function ConciergeDashboard({ searchParams }: { searchParams: Promise<{ error?: string; saved?: string }> }) {
   const { profile } = await myProfile();
   const sp = await searchParams;
   const now = new Date();
@@ -144,13 +144,10 @@ export default async function ConciergeDashboard({ searchParams }: { searchParam
             <p className="eyebrow">My schedule</p>
             <h1 style={{ fontSize: "var(--step-3)" }}>{full.displayName}</h1>
           </div>
-          {full.approved && full.visible && <Link className="btn btn-ghost btn-sm" href="/book">View my booking page</Link>}
+          {full.visible && <Link className="btn btn-ghost btn-sm" href="/book">View my booking page</Link>}
         </div>
 
-        {!full.approved && (
-          <p className="notice">{sp.welcome ? "Thanks for applying. " : ""}Your profile is waiting for approval. Customers can book you once it's approved. You can set your hours in the meantime.</p>
-        )}
-        {full.approved && !full.visible && <p className="notice">Your profile is hidden, so customers can't book you. Turn it back on under Profile.</p>}
+        {!full.visible && <p className="notice">Your profile is hidden, so customers can't book you. Turn it back on under Profile.</p>}
         {sp.error && <p className="notice error" role="alert">{sp.error}</p>}
 
         <div className="panel">

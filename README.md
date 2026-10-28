@@ -1,6 +1,6 @@
 # Royal City Concierge
 
-Booking site for Michelle's bespoke personal concierge service in New Westminster and Burnaby. The site promotes one person: customers read about her and book a time from her calendar at `/book`. She manages her hours, time off and bookings. The database still supports several concierge profiles, but the public site shows only the first approved one.
+Booking site for Michelle's bespoke personal concierge service in New Westminster and Burnaby. The site promotes one person: customers read about her and book a time from her calendar on the home page (also at `/book`). She manages her hours, time off and bookings. There is no concierge sign-up or approval: the admin sets up her own profile once. The database can hold several profiles, but the site only uses the first one.
 
 The brand name, contact details, time zone and booking rules all live in `src/lib/brand.ts`.
 
@@ -39,9 +39,9 @@ npm run build
 | `/book` | Everyone | Michelle's profile and booking calendar |
 | `/concierges`, `/concierges/[slug]` | Everyone | Old links; redirect to `/book` |
 | `/account` | Customers | Upcoming and past bookings, cancel |
-| `/join` | Admins | Set up the owner's profile (published right away) |
+| `/concierge/setup` | Admins | Set up the owner's profile once (published right away) |
 | `/concierge` | Concierges | Bookings, weekly hours, time off, profile |
-| `/admin` | Admins | Approve concierges, reassign or cancel bookings, manage services |
+| `/admin` | Admins | See and cancel upcoming bookings, manage services |
 
 ## How booking works
 
@@ -62,7 +62,7 @@ Everything runs on a single droplet from `docker-compose.yml`. Postgres is only 
 2. Pushing to `main` deploys from then on. Check `http://<droplet IP>/api/health` shows `{"ok":true}`.
 3. To create it by hand instead: an Ubuntu 24.04 droplet, Basic 1 GB in Toronto, with the deploy SSH key. Then add the secrets above and run the Deploy workflow from the Actions tab.
 4. Domain: in Cloudflare, add proxied A records for the domain and `www` pointing to the droplet IP, and set SSL to Full (strict). Update `APP_URL` and `SITE_ADDRESS` and deploy again. Caddy gets the HTTPS certificate on its own.
-5. Caching, when you turn it on: cache `/_next/static/*` and images, and bypass `/api/*`, `/auth/*`, `/account*`, `/concierge*`, `/admin*`, `/join`, `/signin` and any request with a `session` cookie.
+5. Caching, when you turn it on: cache `/_next/static/*` and images, and bypass `/api/*`, `/auth/*`, `/account*`, `/concierge*`, `/admin*`, `/signin` and any request with a `session` cookie.
 
 Backups: a dump runs every 24 hours into `/opt/concierge/backups` and is kept for 14 days. To restore one: `gunzip -c backups/<file>.sql.gz | docker compose exec -T db psql -U concierge concierge`.
 
