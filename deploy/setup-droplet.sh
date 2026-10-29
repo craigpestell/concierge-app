@@ -1,6 +1,6 @@
 #!/bin/sh
-# Prepares an Ubuntu droplet to run the site. Safe to run again: the deploy
-# workflow runs it on every deploy, so a fresh droplet needs no manual setup.
+# Prepares an Ubuntu droplet to run the site and installs pull deploys. Safe to run again:
+# the Droplet setup workflow runs it each time, so a fresh droplet needs no manual setup.
 set -eu
 
 if ! command -v docker >/dev/null; then
@@ -25,3 +25,20 @@ if command -v ufw >/dev/null && ! ufw status | grep -q "Status: active"; then
 fi
 
 mkdir -p /opt/concierge/deploy /opt/concierge/backups
+
+# jq reads the GitHub API in the pull deploy script.
+if ! command -v jq >/dev/null; then
+  apt-get update -qq
+  apt-get install -y -qq jq >/dev/null
+fi
+
+# Pull deploys: the droplet checks main every 5 minutes and deploys green commits itself.
+# The workflow copies these files to /opt/concierge/deploy/ before running this script.
+if [ -f /opt/concierge/deploy/pull-deploy.sh ]; then
+  install -m 0755 /opt/concierge/deploy/pull-deploy.sh /usr/local/sbin/concierge-deploy
+  install -m 0644 /opt/concierge/deploy/concierge-deploy.service /opt/concierge/deploy/concierge-deploy.timer /etc/systemd/system/
+  mkdir -p /etc/concierge-deploy
+  chmod 700 /etc/concierge-deploy
+  systemctl daemon-reload
+  systemctl enable --now concierge-deploy.timer
+fi
