@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { db } from "./db";
 import { brand } from "./brand";
 import { sendEmail } from "./email";
+import { notifyOwners } from "./notify";
 import { isOpen, nightsBetween, stayInterval, stayIsOpen } from "./slots";
 import { isValidDate, localDate } from "./time";
 import { busyIntervals, bookingWindow, stayWindow } from "./availability";
@@ -149,9 +150,8 @@ export async function sendBookingEmails(bookingId: string) {
     subject: `Booked: ${what} with ${b.concierge.displayName}`,
     text: `Hi ${b.customer.name},\n\nYou're booked with ${b.concierge.displayName}.\n\n${what}\n${when}\n${b.address}\nEstimate: ${estimate}\n${arrange}\nTo see or cancel your booking, sign in with this email at ${appUrl()}/account\n\n${brand.name}`,
   });
-  await sendEmail({
-    to: b.concierge.user.email,
+  await notifyOwners(stay ? "stay" : "booking", {
     subject: `New ${stay ? "stay" : "booking"}: ${what}, ${when}`,
     text: `New ${stay ? "overnight stay" : "booking"} from ${b.customer.name}.\n\n${what}\n${when}\n${b.address}\nEstimate: ${estimate}\nPhone: ${b.customer.phone ?? "not given"}\nEmail: ${b.customer.email}\nNotes: ${b.notes || "none"}\n\nSee your bookings at ${appUrl()}/concierge`,
-  });
+  }, { fallback: b.concierge.user.email });
 }

@@ -1,6 +1,7 @@
 import { db } from "./db";
 import { brand } from "./brand";
 import { sendEmail } from "./email";
+import { notifyOwners } from "./notify";
 import { bookingWhen } from "./format";
 import { formatPhone } from "./phone";
 
@@ -12,13 +13,16 @@ export async function cancelBooking(bookingId: string, by: "customer" | "concier
     include: { customer: true, concierge: { include: { user: true } }, service: true },
   });
   const when = bookingWhen(b);
-  if (by !== "concierge") {
-    await sendEmail({
-      to: b.concierge.user.email,
+  const who = { customer: b.customer.name, concierge: b.concierge.displayName, admin: "An admin" }[by];
+  await notifyOwners(
+    "cancelled",
+    {
       subject: `Cancelled: ${b.service.name}, ${when}`,
-      text: `${b.customer.name}'s booking for ${when} has been cancelled. Those ${b.kind === "STAY" ? "days are" : "hours are"} open again on your calendar.`,
-    });
-  }
+      text: `${who} cancelled ${b.customer.name}'s booking for ${when}. Those ${b.kind === "STAY" ? "days are" : "hours are"} open again on the calendar.`,
+    },
+    // She knows when she cancelled one herself.
+    { fallback: b.concierge.user.email, exclude: by === "concierge" ? b.concierge.user.email : undefined },
+  );
   if (by !== "customer") {
     await sendEmail({
       to: b.customer.email,

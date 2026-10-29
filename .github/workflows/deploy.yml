@@ -4,7 +4,7 @@ name: Droplet setup
 # deploys, or apply new settings. It does not deploy code: the droplet does that itself,
 # checking every 5 minutes for a newer commit on main whose CI passed (deploy/pull-deploy.sh).
 # Needs these repository secrets: DROPLET_HOST, DROPLET_SSH_KEY, POSTGRES_PASSWORD,
-# APP_URL, SITE_ADDRESS, ADMIN_EMAILS, and optionally RESEND_API_KEY.
+# APP_URL, SITE_ADDRESS, ADMIN_EMAILS, and optionally RESEND_API_KEY and EMAIL_FORWARD_TOKEN.
 # Feature flags come from repository variables (Settings > Secrets and variables > Actions > Variables),
 # e.g. FEATURE_STAYS=on. Change one, then run this workflow to apply it.
 on:
@@ -49,6 +49,7 @@ jobs:
           SITE_ADDRESS: ${{ secrets.SITE_ADDRESS }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FORWARD_TOKEN: ${{ secrets.EMAIL_FORWARD_TOKEN }}
           FEATURE_STAYS: ${{ vars.FEATURE_STAYS }}
         run: |
           {
@@ -57,6 +58,7 @@ jobs:
             echo "SITE_ADDRESS=${SITE_ADDRESS:-:80}"
             echo "ADMIN_EMAILS=${ADMIN_EMAILS}"
             echo "RESEND_API_KEY=${RESEND_API_KEY}"
+            echo "EMAIL_FORWARD_TOKEN=${EMAIL_FORWARD_TOKEN}"
             echo "EMAIL_FROM=Royal City Concierge <hello@royalcityconcierge.com>"
             echo "FEATURE_STAYS=${FEATURE_STAYS}"
           } > .env.deploy

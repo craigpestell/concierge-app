@@ -19,6 +19,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             tabs={[
               { href: "/admin", label: "Bookings" },
               { href: "/admin/services", label: "Services" },
+              { href: "/admin/notifications", label: "Notifications" },
             ]}
           />
         </div>

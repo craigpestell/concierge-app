@@ -153,3 +153,12 @@ model Booking {
   @@index([conciergeId, start])
   @@index([customerId])
 }
+
+/// Who gets the business's own notification emails, set from /admin/notifications.
+model NotificationRecipient {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  /// Which notifications this address gets: keys from notifyEvents in src/lib/notify.ts.
+  events    String[]
+  createdAt DateTime @default(now())
+}
