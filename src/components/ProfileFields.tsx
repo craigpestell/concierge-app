@@ -30,9 +30,9 @@ export function ProfileFields({ services, d = {}, stays = false }: { services: S
           </div>
           {stays && (
             <div className="field">
-              <label htmlFor="nightlyRate">Overnight stay rate, per night ($)</label>
+              <label htmlFor="nightlyRate">Overnight rate, per night ($)</label>
               <input id="nightlyRate" name="nightlyRate" type="number" min={20} max={1000} step={1} defaultValue={d.nightlyRateCents != null ? d.nightlyRateCents / 100 : ""} />
-              <span className="hint">For house and pet sitting where you stay at the client&apos;s home. Clients pick arrival and departure days and pay this for each night. Leave empty to not offer stays online.</span>
+              <span className="hint">A flat fee for the roughly 8 hours you sleep at the client&apos;s home during a house or pet sitting stay. Waking hours of care are charged at your hourly rate. Leave empty to not offer stays online.</span>
             </div>
           )}
         </div>

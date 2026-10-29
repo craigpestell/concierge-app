@@ -4,7 +4,7 @@ import { brand } from "./brand";
 import { sendEmail } from "./email";
 import { notifyOwners } from "./notify";
 import { bookingConfirmed, ownerNewBooking } from "./email-templates";
-import { isOpen, nightsBetween, stayInterval, stayIsOpen } from "./slots";
+import { isOpen, nightsBetween, stayInterval, stayIsOpen, stayPriceCents } from "./slots";
 import { isValidDate, localDate } from "./time";
 import { busyIntervals, bookingWindow, stayWindow } from "./availability";
 import { normalizeEmail } from "./auth";
@@ -23,7 +23,7 @@ type Contact = {
 export type BookingRequest = Contact &
   (
     | { kind: "visit"; start: string /* ISO instant */; hours: number }
-    | { kind: "stay"; firstDay: string /* YYYY-MM-DD */; lastDay: string }
+    | { kind: "stay"; firstDay: string /* YYYY-MM-DD */; lastDay: string; careHours: number }
   );
 
 export class BookingError extends Error {}
@@ -44,10 +44,14 @@ export function validateBookingRequest(body: unknown): BookingRequest {
 
   let req: BookingRequest;
   if (b.kind === "stay") {
-    req = { ...contact, kind: "stay", firstDay: str("firstDay", 10), lastDay: str("lastDay", 10) };
+    req = { ...contact, kind: "stay", firstDay: str("firstDay", 10), lastDay: str("lastDay", 10), careHours: Number(b.careHours) };
     if (!isValidDate(req.firstDay) || !isValidDate(req.lastDay)) throw new BookingError("Choose the days of your stay.");
     const nights = nightsBetween(req.firstDay, req.lastDay);
     if (nights < 1) throw new BookingError("A stay needs at least one night.");
+    const care = brand.stayCareHours;
+    if (!Number.isInteger(req.careHours) || req.careHours < care.min || req.careHours > care.max) {
+      throw new BookingError(`Choose ${care.min} to ${care.max} hours of care a day.`);
+    }
     if (nights > brand.maxStayNights) throw new BookingError(`Stays can be booked online for up to ${brand.maxStayNights} nights. Call for anything longer.`);
   } else {
     req = { ...contact, kind: "visit", start: str("start", 40), hours: Number(b.hours) };
@@ -93,7 +97,10 @@ export async function createBooking(req: BookingRequest, now = new Date()) {
         if (!stayIsOpen(req.firstDay, req.lastDay, busy, brand.timeZone)) {
           throw new BookingError("Sorry, some of those days were just booked. Please pick other dates.");
         }
-        priceCents = concierge.nightlyRateCents * nightsBetween(req.firstDay, req.lastDay);
+        priceCents = stayPriceCents(nightsBetween(req.firstDay, req.lastDay), req.careHours, {
+          hourlyRateCents: concierge.hourlyRateCents,
+          nightlyRateCents: concierge.nightlyRateCents,
+        });
       } else {
         const open = isOpen(
           { date: first, hours: req.hours, weekly: concierge.availability, busy, now, timeZone: brand.timeZone, minLeadHours: brand.minLeadHours },
@@ -117,7 +124,7 @@ export async function createBooking(req: BookingRequest, now = new Date()) {
           kind: req.kind === "stay" ? "STAY" : "VISIT",
           start,
           end,
-          hours: req.kind === "stay" ? 0 : req.hours,
+          hours: req.kind === "stay" ? req.careHours : req.hours,
           nights: req.kind === "stay" ? nightsBetween(req.firstDay, req.lastDay) : null,
           address: req.address,
           notes: req.notes,

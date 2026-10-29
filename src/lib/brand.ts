@@ -26,4 +26,7 @@ export const brand = {
   gaMeasurementId: "G-1S4M1FYZW3",
   // Longest overnight stay that can be booked online.
   maxStayNights: 30,
+  // Stays are priced per day: the client's estimate of waking hours of care at the hourly rate,
+  // plus her flat overnight rate for the roughly 8 hours she sleeps there.
+  stayCareHours: { min: 1, max: 16, default: 3 },
 } as const;

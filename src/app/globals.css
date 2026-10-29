@@ -220,6 +220,7 @@ a.card:hover { border-color: var(--brass); }
 .bk-step b { font-weight: 400; color: var(--brass); }
 .bk-label { font-size: var(--step--1); font-weight: 600; color: var(--ink-soft); }
 .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.bk-select { font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--paper-2); border: 1px solid var(--rule); border-radius: 4px; padding: 0.45em 0.6em; max-width: 14rem; }
 .bk-est { font-size: 0.95rem; color: var(--ink-soft); border-top: 1px dashed var(--rule); padding-top: 0.9rem; }
 .bk-est strong { color: var(--ink); font-variant-numeric: tabular-nums; }
 .cal-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }

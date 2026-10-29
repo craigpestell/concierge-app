@@ -64,7 +64,7 @@ export async function blockedStayDates(conciergeId: string, now = new Date()) {
 }
 
 /** What the booking calendar needs to offer stays, or null when stays are off or she has no nightly rate. */
-export function stayOffer(nightlyRateCents: number | null, now = new Date()) {
-  if (!features.stays() || nightlyRateCents == null) return null;
-  return { rateCents: nightlyRateCents, ...stayWindow(now) };
+export function stayOffer(rates: { hourlyRateCents: number; nightlyRateCents: number | null }, now = new Date()) {
+  if (!features.stays() || rates.nightlyRateCents == null) return null;
+  return { nightlyRateCents: rates.nightlyRateCents, hourlyRateCents: rates.hourlyRateCents, careHours: brand.stayCareHours, ...stayWindow(now) };
 }

@@ -38,6 +38,10 @@ export function slugify(s: string) {
     .slice(0, 40);
 }
 
+export function hoursLabel(hours: number) {
+  return hours === 1 ? "1 hour" : `${hours} hours`;
+}
+
 export function nightsLabel(nights: number) {
   return nights === 1 ? "1 night" : `${nights} nights`;
 }

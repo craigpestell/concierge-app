@@ -137,7 +137,7 @@ model Booking {
   /// A stay runs from local midnight on the first day to local midnight after the last day.
   start       DateTime
   end         DateTime
-  /// Booked hours for a visit; 0 for a stay.
+  /// Booked hours for a visit; for a stay, the estimated waking hours of care per day.
   hours       Int
   /// Nights for a stay; null for a visit.
   nights      Int?

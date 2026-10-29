@@ -1,6 +1,6 @@
 import { brand } from "./brand";
 import { appUrl } from "./auth";
-import { bookingWhen, dayLabel, money, nightsLabel } from "./format";
+import { bookingWhen, dayLabel, hoursLabel, money, nightsLabel } from "./format";
 import { formatPhone } from "./phone";
 
 /**
@@ -16,6 +16,8 @@ export type BookingEmailData = {
   start: Date;
   end: Date;
   nights: number | null;
+  /** Hours for a visit; hours of care a day for a stay. */
+  hours: number;
   address: string;
   notes: string;
   priceCents: number;
@@ -93,7 +95,9 @@ const what = (b: BookingEmailData) => (isStay(b) ? `Overnight stay (${b.service.
 const phone = (b: BookingEmailData) => (b.concierge.businessPhone ? formatPhone(b.concierge.businessPhone) : brand.phone);
 const first = (name: string) => name.split(" ")[0]!;
 const estimate = (b: BookingEmailData) =>
-  isStay(b) ? `${money(b.priceCents)} for ${nightsLabel(b.nights ?? 0)}, paid after the stay` : `${money(b.priceCents)}, paid after the visit`;
+  isStay(b)
+    ? `${money(b.priceCents)} for ${nightsLabel(b.nights ?? 0)}, based on ${hoursLabel(b.hours)} of care a day plus the overnight rate. Paid after the stay, for the hours actually worked`
+    : `${money(b.priceCents)}, paid after the visit`;
 
 function bookingDetails(b: BookingEmailData): [string, string][] {
   return [

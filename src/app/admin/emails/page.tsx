@@ -16,10 +16,10 @@ function samples(owner: { displayName: string; businessPhone: string | null } | 
     concierge: owner ?? { displayName: brand.ownerName, businessPhone: null },
     address: "123 Columbia St, New Westminster",
   };
-  const visit: t.BookingEmailData = { ...common, kind: "VISIT", start: base, end: new Date(base.getTime() + 2 * 3600_000), nights: null, notes: "Pick up dry cleaning on the way, please.", priceCents: 10000, service: { name: "Errands & shopping" } };
+  const visit: t.BookingEmailData = { ...common, kind: "VISIT", start: base, end: new Date(base.getTime() + 2 * 3600_000), nights: null, hours: 2, notes: "Pick up dry cleaning on the way, please.", priceCents: 10000, service: { name: "Errands & shopping" } };
   const stayStart = new Date(base.getTime() + 7 * day);
   stayStart.setUTCHours(7, 0, 0, 0); // local midnight
-  const stay: t.BookingEmailData = { ...common, kind: "STAY", start: stayStart, end: new Date(stayStart.getTime() + 5 * day), nights: 4, notes: "Two cats, one shy.", priceCents: 72000, service: { name: "Pets & plants" } };
+  const stay: t.BookingEmailData = { ...common, kind: "STAY", start: stayStart, end: new Date(stayStart.getTime() + 5 * day), nights: 4, hours: 6, notes: "Two cats, one shy.", priceCents: 72000, service: { name: "Pets & plants" } };
   return { visit, stay };
 }
 

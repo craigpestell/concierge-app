@@ -8,6 +8,7 @@ const visit: BookingEmailData = {
   start,
   end: new Date("2026-11-10T20:00:00Z"),
   nights: null,
+  hours: 2,
   address: "1 Main St",
   notes: "",
   priceCents: 10000,
