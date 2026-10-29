@@ -3,7 +3,7 @@ import { brand } from "@/lib/brand";
 import { money } from "@/lib/format";
 import { bookingWindow } from "@/lib/availability";
 import { currentUser } from "@/lib/auth";
-import { getOwner, firstName } from "@/lib/owner";
+import { getOwner, firstName, publicPhone } from "@/lib/owner";
 import { Avatar } from "@/components/Avatar";
 import { BookingCalendar } from "@/components/BookingCalendar";
 
@@ -15,14 +15,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ service?: string }> }) {
-  const [{ service }, c] = await Promise.all([searchParams, getOwner()]);
+  const [{ service }, c, phone] = await Promise.all([searchParams, getOwner(), publicPhone()]);
   if (!c) {
     return (
       <section className="section">
         <div className="wrap stack" style={{ maxWidth: 640 }}>
           <p className="eyebrow">Book</p>
           <h1 style={{ fontSize: "var(--step-3)" }}>Online booking opens soon</h1>
-          <p className="muted">In the meantime, call or text {brand.phone} or email {brand.email}.</p>
+          <p className="muted">In the meantime, call or text {phone} or email {brand.email}.</p>
         </div>
       </section>
     );
@@ -63,7 +63,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
               prefill={user ? { name: user.name, email: user.email, phone: user.phone ?? "" } : null}
             />
           ) : (
-            <p className="empty">Services are being set up. Call or text {brand.phone} to book in the meantime.</p>
+            <p className="empty">Services are being set up. Call or text {phone} to book in the meantime.</p>
           )}
         </div>
       </div>

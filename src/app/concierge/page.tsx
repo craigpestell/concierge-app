@@ -10,6 +10,7 @@ import { cancelBooking } from "@/lib/booking-actions";
 import { readProfileForm, uniqueSlug } from "@/lib/profile-form";
 import { money, whenLabel, dayLabel } from "@/lib/format";
 import { addDays, isValidDate, localDate, minutesLabel, zonedToInstant } from "@/lib/time";
+import { formatPhone, providerGuide } from "@/lib/phone";
 import { ProfileFields } from "@/components/ProfileFields";
 import { StatusPill } from "@/components/StatusPill";
 
@@ -236,6 +237,18 @@ export default async function ConciergeDashboard({ searchParams }: { searchParam
             <div style={{ alignSelf: "end" }}><button className="btn btn-sm" type="submit">Add time off</button></div>
           </form>
           <p className="hint">Existing bookings aren't cancelled by time off. Cancel them above if you need to.</p>
+        </div>
+
+        <div className="panel" id="phone">
+          <div className="panel-head">
+            <h2 style={{ fontSize: "var(--step-2)" }}>Business phone</h2>
+            <Link className="btn btn-ghost btn-sm" href="/concierge/phone">{full.businessPhone ? "Change" : "Set up a free number"}</Link>
+          </div>
+          {full.businessPhone ? (
+            <p className="muted small">The website shows {formatPhone(full.businessPhone)}{providerGuide(full.phoneProvider) ? ` (${providerGuide(full.phoneProvider)!.name})` : ""}.</p>
+          ) : (
+            <p className="muted small">The website still shows a placeholder number. Get a free business line with Fongo Works or TextNow so clients never need your personal mobile.</p>
+          )}
         </div>
 
         <form action={saveProfile} className="panel form" id="profile">

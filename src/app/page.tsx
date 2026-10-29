@@ -4,7 +4,8 @@ import { db } from "@/lib/db";
 import { money } from "@/lib/format";
 import { currentUser } from "@/lib/auth";
 import { bookingWindow } from "@/lib/availability";
-import { getOwner, firstName } from "@/lib/owner";
+import { getOwner, firstName, publicPhone } from "@/lib/owner";
+import { telHref } from "@/lib/phone";
 import { serviceGroups, familyVisit, notIncluded, faqs } from "@/lib/content";
 import { Avatar } from "@/components/Avatar";
 import { BookingCalendar } from "@/components/BookingCalendar";
@@ -12,10 +13,11 @@ import { BookingCalendar } from "@/components/BookingCalendar";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [owner, services, user] = await Promise.all([
+  const [owner, services, user, phone] = await Promise.all([
     getOwner(),
     db.service.findMany({ where: { active: true }, orderBy: { sort: "asc" } }),
     currentUser(),
+    publicPhone(),
   ]);
   const name = owner ? firstName(owner.displayName) : brand.ownerName;
   const rate = owner ? money(owner.hourlyRateCents) : null;
@@ -83,7 +85,7 @@ export default async function Home() {
               prefill={user ? { name: user.name, email: user.email, phone: user.phone ?? "" } : null}
             />
           ) : (
-            <p className="empty">Online booking opens soon. In the meantime, call or text {brand.phone} or email {brand.email}.</p>
+            <p className="empty">Online booking opens soon. In the meantime, call or text {phone} or email {brand.email}.</p>
           )}
         </div>
       </section>
@@ -247,7 +249,7 @@ export default async function Home() {
             <p>Not sure what to book, or need something today? Get in touch directly.</p>
           </div>
           <dl className="contact-lines">
-            <div className="contact-line"><dt className="lbl">Phone</dt><dd className="val"><a href={`tel:${brand.phone.replace(/\D/g, "")}`}>{brand.phone}</a></dd></div>
+            <div className="contact-line"><dt className="lbl">Phone</dt><dd className="val"><a href={telHref(phone)}>{phone}</a></dd></div>
             <div className="contact-line"><dt className="lbl">Email</dt><dd className="val"><a href={`mailto:${brand.email}`}>{brand.email}</a></dd></div>
             <div className="contact-line"><dt className="lbl">Hours</dt><dd className="val">{brand.hours}</dd></div>
           </dl>
