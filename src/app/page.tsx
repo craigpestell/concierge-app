@@ -3,7 +3,7 @@ import { brand } from "@/lib/brand";
 import { db } from "@/lib/db";
 import { money } from "@/lib/format";
 import { currentUser } from "@/lib/auth";
-import { bookingWindow } from "@/lib/availability";
+import { bookingWindow, stayOffer } from "@/lib/availability";
 import { getOwner, firstName, publicPhone } from "@/lib/owner";
 import { telHref } from "@/lib/phone";
 import { serviceGroups, familyVisit, notIncluded, faqs } from "@/lib/content";
@@ -21,6 +21,7 @@ export default async function Home() {
   ]);
   const name = owner ? firstName(owner.displayName) : brand.ownerName;
   const rate = owner ? money(owner.hourlyRateCents) : null;
+  const stay = owner ? stayOffer(owner.nightlyRateCents) : null;
   const bookable = owner
     ? owner.services
         .filter((s) => s.service.active)
@@ -70,7 +71,10 @@ export default async function Home() {
           <div className="section-head" style={{ marginBottom: 0 }}>
             <p className="eyebrow">Book a time</p>
             <h2 id="book-title">Pick a time that suits you.</h2>
-            <p>Choose what you need, how long and a start time on {name}&apos;s calendar. You&apos;ll get a confirmation by email right away.</p>
+            <p>
+              Choose what you need, how long and a start time on {name}&apos;s calendar.
+              {stay && <> Going away? Book an overnight stay and {name} will look after your pets and home while you&apos;re gone.</>} You&apos;ll get a confirmation by email right away.
+            </p>
           </div>
           {owner && bookable.length ? (
             <BookingCalendar
@@ -83,6 +87,7 @@ export default async function Home() {
               window={bookingWindow()}
               timeZone={brand.timeZone}
               prefill={user ? { name: user.name, email: user.email, phone: user.phone ?? "" } : null}
+              stay={stay}
             />
           ) : (
             <p className="empty">Online booking opens soon. In the meantime, call or text {phone} or email {brand.email}.</p>
@@ -195,6 +200,7 @@ export default async function Home() {
             <dl className="terms">
               <div><dt>Minimum booking</dt><dd>1 hour</dd></div>
               <div><dt>Longer visits</dt><dd>Book up to {Math.max(...brand.lengths)} hours at a time</dd></div>
+              {stay && <div><dt>Overnight house &amp; pet sitting</dt><dd>{money(stay.rateCents)} a night, staying at your home</dd></div>}
               <div><dt>Driving outside New West &amp; Burnaby</dt><dd>Mileage extra</dd></div>
               <div><dt>Purchases made for you</dt><dd>At cost, with receipt</dd></div>
             </dl>

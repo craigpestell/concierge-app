@@ -55,3 +55,25 @@ export function datesBetween(from: string, to: string): string[] {
   for (let d = from; d <= to; d = addDays(d, 1)) out.push(d);
   return out;
 }
+
+/** The local-midnight bounds of a stay that takes up every day from `first` to `last`, inclusive. */
+export function stayInterval(first: string, last: string, timeZone: string): Interval {
+  return { start: zonedToInstant(first, 0, timeZone), end: zonedToInstant(addDays(last, 1), 0, timeZone) };
+}
+
+/** Nights in a stay from `first` (arrival day) to `last` (departure day). */
+export function nightsBetween(first: string, last: string): number {
+  const [a, b] = [first, last].map((d) => Date.parse(`${d}T00:00:00Z`));
+  return Math.round((b! - a!) / 86_400_000);
+}
+
+/** Days between two dates that a stay can't touch because something is already booked or marked off. */
+export function stayBlockedDates(from: string, to: string, busy: Interval[], timeZone: string): string[] {
+  return datesBetween(from, to).filter((d) => busy.some((b) => overlaps(stayInterval(d, d, timeZone), b)));
+}
+
+/** Whether a stay from `first` to `last` is clear of bookings and time off on every day. */
+export function stayIsOpen(first: string, last: string, busy: Interval[], timeZone: string): boolean {
+  const stay = stayInterval(first, last, timeZone);
+  return !busy.some((b) => overlaps(stay, b));
+}

@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { brand } from "@/lib/brand";
 import { cancelBooking } from "@/lib/booking-actions";
-import { money, whenLabel } from "@/lib/format";
+import { money, bookingWhen } from "@/lib/format";
 import { StatusPill } from "@/components/StatusPill";
 
 export const metadata: Metadata = { title: "My bookings" };
@@ -53,8 +53,8 @@ export default async function AccountPage() {
                     const late = b.start.getTime() - now.getTime() < brand.cancelFreeHours * 3600_000;
                     return (
                       <tr key={b.id}>
-                        <td>{whenLabel(b.start, b.end)}<div className="muted small">{b.address}</div></td>
-                        <td>{b.service.name}</td>
+                        <td>{bookingWhen(b)}<div className="muted small">{b.address}</div></td>
+                        <td>{b.kind === "STAY" ? `Overnight stay · ${b.service.name}` : b.service.name}</td>
                         <td>{b.concierge.displayName}</td>
                         <td className="num">{money(b.priceCents)}</td>
                         <td>
@@ -84,8 +84,8 @@ export default async function AccountPage() {
                 <tbody>
                   {past.map((b) => (
                     <tr key={b.id}>
-                      <td>{whenLabel(b.start, b.end)}</td>
-                      <td>{b.service.name}</td>
+                      <td>{bookingWhen(b)}</td>
+                      <td>{b.kind === "STAY" ? `Overnight stay · ${b.service.name}` : b.service.name}</td>
                       <td>{b.concierge.displayName}</td>
                       <td><StatusPill status={b.status} /></td>
                       <td>{b.visitNote ?? ""}</td>

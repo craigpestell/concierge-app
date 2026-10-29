@@ -8,7 +8,8 @@ import { requireUser } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { cancelBooking } from "@/lib/booking-actions";
 import { readProfileForm, uniqueSlug } from "@/lib/profile-form";
-import { money, whenLabel, dayLabel } from "@/lib/format";
+import { money, bookingWhen, dayLabel } from "@/lib/format";
+import { features } from "@/lib/features";
 import { addDays, isValidDate, localDate, minutesLabel, zonedToInstant } from "@/lib/time";
 import { formatPhone, providerGuide } from "@/lib/phone";
 import { ProfileFields } from "@/components/ProfileFields";
@@ -80,8 +81,8 @@ async function markDone(f: FormData) {
   await db.booking.update({ where: { id }, data: { status: "DONE", completedAt: new Date(), visitNote: note || null } });
   await sendEmail({
     to: b.customer.email,
-    subject: `${profile.displayName} finished your ${b.service.name.toLowerCase()} visit`,
-    text: `Hi ${b.customer.name},\n\n${profile.displayName} has finished your visit on ${whenLabel(b.start, b.end)}.${note ? `\n\nTheir note:\n${note}` : ""}\n\nThanks for booking with ${brand.name}.`,
+    subject: `${profile.displayName} finished your ${b.service.name.toLowerCase()} ${b.kind === "STAY" ? "stay" : "visit"}`,
+    text: `Hi ${b.customer.name},\n\n${profile.displayName} has finished your ${b.kind === "STAY" ? "stay" : "visit"}, ${bookingWhen(b)}.${note ? `\n\nTheir note:\n${note}` : ""}\n\nThanks for booking with ${brand.name}.`,
   });
   revalidatePath("/concierge");
 }
@@ -97,7 +98,7 @@ async function cancelAsConcierge(f: FormData) {
 async function saveProfile(f: FormData) {
   "use server";
   const { profile } = await myProfile();
-  const read = readProfileForm(f);
+  const read = readProfileForm(f, features.stays());
   if ("error" in read) redirect(`/concierge?error=${encodeURIComponent(read.error)}#profile`);
   const v = read.value;
   const slug = v.displayName === profile.displayName ? profile.slug : await uniqueSlug(v.displayName, profile.id);
@@ -112,6 +113,7 @@ async function saveProfile(f: FormData) {
         bio: v.bio,
         photoUrl: v.photoUrl,
         hourlyRateCents: v.hourlyRateCents,
+        nightlyRateCents: v.nightlyRateCents,
         areas: v.areas,
         visible: f.get("visible") === "on",
         services: { create: v.serviceIds.map((serviceId) => ({ serviceId })) },
@@ -160,7 +162,7 @@ export default async function ConciergeDashboard({ searchParams }: { searchParam
                 <tbody>
                   {bookings.map((b) => (
                     <tr key={b.id}>
-                      <td>{whenLabel(b.start, b.end)}<div className="muted small">{b.service.name} · {money(b.priceCents)}</div></td>
+                      <td>{bookingWhen(b)}<div className="muted small">{b.kind === "STAY" ? `Overnight stay · ${b.service.name}` : b.service.name} · {money(b.priceCents)}</div></td>
                       <td>{b.customer.name}<div className="muted small">{b.customer.phone ?? ""} {b.customer.email}</div></td>
                       <td>{b.address}{b.notes && <div className="muted small">{b.notes}</div>}{b.visitNote && <div className="small">Note: {b.visitNote}</div>}</td>
                       <td><StatusPill status={b.status} /></td>
@@ -168,7 +170,7 @@ export default async function ConciergeDashboard({ searchParams }: { searchParam
                         {b.status === "CONFIRMED" && b.start <= now && (
                           <form action={markDone} className="stack" style={{ gap: "0.4rem", minWidth: 200 }}>
                             <input type="hidden" name="id" value={b.id} />
-                            <div className="field"><label htmlFor={`note-${b.id}`}>Visit note for the customer</label><textarea id={`note-${b.id}`} name="note" style={{ minHeight: "4rem" }} /></div>
+                            <div className="field"><label htmlFor={`note-${b.id}`}>{b.kind === "STAY" ? "Stay" : "Visit"} note for the customer</label><textarea id={`note-${b.id}`} name="note" style={{ minHeight: "4rem" }} /></div>
                             <div><button className="btn btn-sm" type="submit">Mark done</button></div>
                           </form>
                         )}
@@ -259,6 +261,7 @@ export default async function ConciergeDashboard({ searchParams }: { searchParam
           <ProfileFields
             services={services}
             d={{ ...full, serviceIds: full.services.map((s) => s.serviceId) }}
+            stays={features.stays()}
           />
           <label className="check"><input type="checkbox" name="visible" defaultChecked={full.visible} /> Show my profile and take bookings</label>
           <div><button className="btn btn-sm" type="submit">Save profile</button></div>

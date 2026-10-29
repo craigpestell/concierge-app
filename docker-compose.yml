@@ -29,6 +29,7 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
+      FEATURE_STAYS: ${FEATURE_STAYS:-}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 15s
