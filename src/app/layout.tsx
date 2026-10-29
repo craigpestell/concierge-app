@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Marcellus, Figtree } from "next/font/google";
 import { brand } from "@/lib/brand";
 import { currentUser } from "@/lib/auth";
+import { SiteNav } from "@/components/SiteNav";
 import "./globals.css";
 
 const display = Marcellus({ weight: "400", subsets: ["latin"], variable: "--font-display" });
@@ -24,22 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <span className="brand-mark" aria-hidden="true">{brand.monogram}</span>
               <span className="brand-name">{brand.name}</span>
             </Link>
-            <nav className="nav" aria-label="Main">
-              <Link className="hide-sm" href="/#services">Services</Link>
-              <Link className="hide-sm" href="/#families">For families</Link>
-              <Link className="hide-sm" href="/#rates">Rates</Link>
-              <Link className="hide-sm" href="/#faq">FAQ</Link>
-              {user ? (
-                <>
-                  {user.profile && <Link href="/concierge">My schedule</Link>}
-                  {user.role === "ADMIN" && <Link href="/admin">Admin</Link>}
-                  <Link href="/account">Account</Link>
-                </>
-              ) : (
-                <Link href="/signin">Sign in</Link>
-              )}
-              <Link className="btn btn-sm" href="/#book">Book a time</Link>
-            </nav>
+            <SiteNav user={user ? { hasProfile: Boolean(user.profile), isAdmin: user.role === "ADMIN" } : null} />
           </div>
         </header>
         <main>{children}</main>
