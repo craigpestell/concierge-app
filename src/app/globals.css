@@ -267,15 +267,78 @@ a.card:hover { border-color: var(--brass); }
 .notice { border-left: 3px solid var(--brass); background: var(--brass-soft); padding: 0.9rem 1.1rem; border-radius: 0 6px 6px 0; }
 .error { color: var(--danger); font-weight: 500; }
 
-/* Dashboards */
-.dash { display: grid; gap: 2.4rem; }
+/* Dashboards: the signed-in pages (My schedule, Admin, My bookings). Each area has a header, a row of
+   section tabs, and panels below. Bookings show as cards rather than tables so they read on a phone. */
+.dash { display: grid; gap: 1.6rem; }
+.dash.narrow, .panel.narrow { max-width: 860px; width: 100%; }
+.dash-top { display: grid; gap: 1.2rem; }
+.dash-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+.dash-head .eyebrow { overflow-wrap: anywhere; }
+.dash-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+.tabs { display: flex; gap: 0.3rem; border-bottom: 1px solid var(--rule); }
+.tab { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.75rem 0.95rem; margin-bottom: -1px; border-bottom: 2px solid transparent; text-decoration: none; white-space: nowrap; color: var(--ink-soft); font-size: 0.95rem; font-weight: 500; }
+.tab:hover { color: var(--ink); }
+.tab[aria-current="page"] { color: var(--ink); border-bottom-color: var(--brass); }
+.tab-count { font-size: 0.72rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; padding: 0.3em 0.55em; border-radius: 999px; background: var(--brass-soft); color: var(--ink); }
+.stats { margin: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.stat { background: var(--paper); padding: 1rem 1.2rem; display: grid; gap: 0.2rem; align-content: start; }
+.stat dt { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; color: var(--ink-soft); }
+.stat dd { margin: 0; font-family: var(--font-display), Georgia, serif; font-size: var(--step-1); line-height: 1.25; }
+.stat dd.hint { font-family: inherit; font-size: var(--step--1); line-height: 1.4; }
+.dash-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.6rem; align-items: start; }
+.booking-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.8rem; }
+.booking { border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); padding: 1rem 1.2rem; display: grid; gap: 1rem 1.8rem; }
+.booking:has(.booking-actions) { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem); }
+.panel .booking { background: color-mix(in srgb, var(--paper-2) 55%, var(--paper)); }
+.booking-main { display: grid; gap: 0.45rem; min-width: 0; }
+.booking-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.4rem 1rem; flex-wrap: wrap; }
+.booking-when { font-weight: 600; }
+.booking-facts { margin: 0; display: grid; gap: 0.3rem; }
+.booking-facts > div { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 0.6rem; }
+.booking-facts dt { color: var(--ink-soft); }
+.booking-facts dd { margin: 0; overflow-wrap: anywhere; }
+.booking-facts a { color: inherit; }
+.booking-actions { display: grid; gap: 0.4rem; align-content: start; justify-items: start; }
+.booking-actions .field, .booking-actions form { width: 100%; }
+.item-list { list-style: none; margin: 0; padding: 0; }
+.item-list li { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding-block: 0.65rem; border-bottom: 1px solid var(--rule); }
+.item-list li:first-child { border-top: 1px solid var(--rule); }
+.subpanel { border-top: 1px dashed var(--rule); padding-top: 1.1rem; }
+.add-row { display: flex; gap: 0.6rem; align-items: end; flex-wrap: wrap; }
+.add-row .field { flex: 1 1 14rem; }
+.form-section { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 1rem; }
+.form-section > legend { width: 100%; padding: 0; margin-bottom: 1rem; font-family: var(--font-display), Georgia, serif; font-size: var(--step-1); }
+/* The rule sits on the legend, not the fieldset, so the legend doesn't cut through it. */
+.form-section + .form-section > legend, .form-foot { border-top: 1px solid var(--rule); padding-top: 1.3rem; }
+fieldset.field { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset.field > legend { padding: 0; margin-bottom: 0.45rem; }
+.check-chip { align-items: center; border: 1px solid var(--rule); border-radius: 999px; padding: 0.35em 0.85em; background: var(--paper-2); cursor: pointer; }
+.check-chip input { margin-top: 0; }
+.check-chip:has(input:checked) { border-color: var(--brass); background: var(--brass-soft); }
+/* Below 960px panels stack, and booking cards put their actions under the details. */
+@media (max-width: 959px) {
+  .dash-cols { grid-template-columns: minmax(0, 1fr); }
+  .booking, .booking:has(.booking-actions) { grid-template-columns: minmax(0, 1fr); }
+  .booking-actions { border-top: 1px dashed var(--rule); padding-top: 0.8rem; }
+  .booking-actions .field { max-width: 32rem; }
+}
+/* Phones: tabs wrap into a row of pills so none hide off-screen. */
+@media (max-width: 599px) {
+  .dash { gap: 1.2rem; }
+  .dash-head { align-items: flex-start; }
+  .tabs { flex-wrap: wrap; gap: 0.4rem; border-bottom: 0; }
+  .tab { margin: 0; padding: 0.5rem 0.85rem; border: 1px solid var(--rule); border-radius: 999px; font-size: var(--step--1); background: var(--paper-2); }
+  .tab[aria-current="page"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .tab[aria-current="page"] .tab-count { background: var(--brass); color: #fff; }
+  .stats { grid-auto-flow: row; }
+  .stat { padding: 0.8rem 1rem; }
+  .booking { padding: 0.9rem 1rem; }
+}
+@media (max-width: 379px) {
+  .booking-facts > div { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
 .panel { border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); padding: clamp(1.1rem, 3vw, 1.6rem); display: grid; gap: 1rem; }
 .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-th, td { text-align: left; padding: 0.7rem 0.6rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
-th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft); font-weight: 600; }
-td.num { font-variant-numeric: tabular-nums; }
 .pill { display: inline-block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; border-radius: 999px; padding: 0.2em 0.7em; background: var(--paper-2); color: var(--ink-soft); }
 .pill-confirmed { background: var(--brass-soft); color: var(--ink); }
 .pill-done { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
