@@ -138,6 +138,16 @@ p { margin: 0; }
 }
 .site-footer { border-top: 1px solid var(--rule); padding-block: 2.2rem; font-size: var(--step--1); color: var(--ink-soft); }
 .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem 2rem; }
+.footer-links { display: flex; gap: 1.2rem; }
+.link-button { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
+
+/* Cookie choice */
+.consent {
+  position: fixed; z-index: 50; left: 16px; right: 16px; bottom: 16px; margin-inline: auto; max-width: 560px;
+  display: grid; gap: 0.8rem; padding: 1rem 1.2rem; border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--paper); box-shadow: 0 10px 30px rgb(0 0 0 / 0.15); font-size: var(--step--1);
+}
+.consent p { margin: 0; }
 
 /* Home */
 .hero { padding-block: clamp(3rem, 8vw, 6rem) clamp(2.5rem, 6vw, 4.5rem); }

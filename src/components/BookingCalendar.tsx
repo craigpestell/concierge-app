@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { events, track } from "@/lib/analytics";
 
 type Props = {
   slug: string;
@@ -58,6 +59,14 @@ export function BookingCalendar(p: Props) {
   const [firstDay, setFirstDay] = useState<string | null>(null);
   const [lastDay, setLastDay] = useState<string | null>(null);
   const stay = mode === "stay" && p.stay ? p.stay : null;
+
+  // booking_start fires once per booking, when the visitor first picks a day.
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current || !(date || firstDay)) return;
+    started.current = true;
+    track(events.bookingStart, { booking_type: mode, service });
+  }, [date, firstDay, mode, service]);
 
   const fmt = useMemo(
     () => ({
@@ -172,6 +181,7 @@ export function BookingCalendar(p: Props) {
       const body = await r.json();
       if (!r.ok) {
         setError(body.error ?? "Something went wrong. Please try again.");
+        track(events.bookingError, { booking_type: mode, reason: r.status === 409 ? "slot_taken" : `http_${r.status}` });
         if (r.status === 409 || /taken|just booked/i.test(body.error ?? "")) {
           setStart(null);
           setLastDay(null);
@@ -179,6 +189,13 @@ export function BookingCalendar(p: Props) {
         }
         return;
       }
+      track(events.bookingComplete, {
+        booking_type: mode,
+        service,
+        ...(stay ? { nights } : { hours }),
+        value: estimateCents / 100,
+        currency: "CAD",
+      });
       setDone(body);
     } catch {
       setError("Couldn't reach the server. Check your connection and try again.");
@@ -202,6 +219,7 @@ export function BookingCalendar(p: Props) {
             type="button"
             onClick={() => {
               setDone(null);
+              started.current = false;
               setDate(null);
               setStart(null);
               setFirstDay(null);

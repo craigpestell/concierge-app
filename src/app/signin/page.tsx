@@ -33,7 +33,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
             </div>
             {sp.error === "email" && <p className="error small">Enter a valid email address.</p>}
             {sp.error === "link" && <p className="error small">That sign-in link has expired or was already used. Request a new one.</p>}
-            <div><button className="btn" type="submit">Email me a link</button></div>
+            <div><button className="btn" type="submit" data-track="sign_in_request" data-track-location="signin">Email me a link</button></div>
             <p className="hint">No password needed. Use the same email you booked with to see your bookings.</p>
           </form>
         )}

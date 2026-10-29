@@ -32,11 +32,11 @@ export function SiteNav({ user }: Props) {
             <Link href="/account">Account</Link>
           </>
         ) : (
-          <Link href="/signin">Sign in</Link>
+          <Link href="/signin" data-track="cta_click" data-track-cta="sign_in" data-track-location="header">Sign in</Link>
         )}
-        <Link className="btn nav-menu-book" href="/#book">Book a time</Link>
+        <Link className="btn nav-menu-book" href="/#book" data-track="cta_click" data-track-cta="book_a_time" data-track-location="menu">Book a time</Link>
       </div>
-      <Link className="btn btn-sm nav-book" href="/#book">Book a time</Link>
+      <Link className="btn btn-sm nav-book" href="/#book" data-track="cta_click" data-track-cta="book_a_time" data-track-location="header">Book a time</Link>
       <button type="button" className="nav-toggle" aria-expanded={open} aria-controls="site-menu" onClick={() => setOpen((o) => !o)}>
         <span className="nav-toggle-bars" aria-hidden="true" />
         <span className="nav-toggle-label">{open ? "Close" : "Menu"}</span>

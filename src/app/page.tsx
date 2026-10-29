@@ -44,8 +44,8 @@ export default async function Home() {
               {name} what needs doing and she&apos;ll figure out the rest.
             </p>
             <div className="actions" style={{ marginTop: "2rem" }}>
-              <Link className="btn" href="/#book">Book a time</Link>
-              <Link className="btn btn-ghost" href="/#families">Help for an aging parent</Link>
+              <Link className="btn" href="/#book" data-track="cta_click" data-track-cta="book_a_time" data-track-location="hero">Book a time</Link>
+              <Link className="btn btn-ghost" href="/#families" data-track="cta_click" data-track-cta="aging_parent" data-track-location="hero">Help for an aging parent</Link>
             </div>
             {rate && <p className="muted small" style={{ marginTop: "1.2rem" }}>{rate}/hour · one-hour minimum · serving {brand.area}</p>}
           </div>
@@ -161,7 +161,7 @@ export default async function Home() {
               <li>Small jobs around the house, like a burnt-out lightbulb</li>
               <li>A short update to you after each visit</li>
             </ul>
-            <div><Link className="btn btn-brass" href="/#book">Book a visit for a parent</Link></div>
+            <div><Link className="btn btn-brass" href="/#book" data-track="cta_click" data-track-cta="book_parent_visit" data-track-location="families">Book a visit for a parent</Link></div>
           </div>
           <div className="visit" aria-label="Example visit">
             <div className="visit-head"><span className="t">Tuesday with Mom</span><span className="d">Example visit · 3 hours</span></div>
@@ -255,8 +255,8 @@ export default async function Home() {
             <p>Not sure what to book, or need something today? Get in touch directly.</p>
           </div>
           <dl className="contact-lines">
-            <div className="contact-line"><dt className="lbl">Phone</dt><dd className="val"><a href={telHref(phone)}>{phone}</a></dd></div>
-            <div className="contact-line"><dt className="lbl">Email</dt><dd className="val"><a href={`mailto:${brand.email}`}>{brand.email}</a></dd></div>
+            <div className="contact-line"><dt className="lbl">Phone</dt><dd className="val"><a href={telHref(phone)} data-track-location="contact">{phone}</a></dd></div>
+            <div className="contact-line"><dt className="lbl">Email</dt><dd className="val"><a href={`mailto:${brand.email}`} data-track-location="contact">{brand.email}</a></dd></div>
             <div className="contact-line"><dt className="lbl">Hours</dt><dd className="val">{brand.hours}</dd></div>
           </dl>
         </div>
