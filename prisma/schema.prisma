@@ -148,6 +148,8 @@ model Booking {
   visitNote   String?
   completedAt DateTime?
   cancelledAt DateTime?
+  /// When the client's reminder email went out (src/lib/reminders.ts).
+  reminderSentAt DateTime?
   createdAt   DateTime         @default(now())
 
   @@index([conciergeId, start])

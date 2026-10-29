@@ -3,11 +3,11 @@ import { db } from "./db";
 import { brand } from "./brand";
 import { sendEmail } from "./email";
 import { notifyOwners } from "./notify";
+import { bookingConfirmed, ownerNewBooking } from "./email-templates";
 import { isOpen, nightsBetween, stayInterval, stayIsOpen } from "./slots";
 import { isValidDate, localDate } from "./time";
 import { busyIntervals, bookingWindow, stayWindow } from "./availability";
-import { normalizeEmail, appUrl } from "./auth";
-import { bookingWhen, money, nightsLabel } from "./format";
+import { normalizeEmail } from "./auth";
 
 type Contact = {
   conciergeSlug: string;
@@ -138,20 +138,6 @@ export async function sendBookingEmails(bookingId: string) {
     where: { id: bookingId },
     include: { concierge: { include: { user: true } }, service: true, customer: true },
   });
-  const when = bookingWhen(b);
-  const stay = b.kind === "STAY";
-  const what = stay ? `Overnight stay (${b.service.name.toLowerCase()})` : b.service.name;
-  const estimate = stay
-    ? `${money(b.priceCents)} for ${nightsLabel(b.nights ?? 0)} (paid after the stay)`
-    : `${money(b.priceCents)} (paid after the visit)`;
-  const arrange = stay ? `\n${b.concierge.displayName} will be in touch before the stay to arrange arrival times, keys and care notes.\n` : "";
-  await sendEmail({
-    to: b.customer.email,
-    subject: `Booked: ${what} with ${b.concierge.displayName}`,
-    text: `Hi ${b.customer.name},\n\nYou're booked with ${b.concierge.displayName}.\n\n${what}\n${when}\n${b.address}\nEstimate: ${estimate}\n${arrange}\nTo see or cancel your booking, sign in with this email at ${appUrl()}/account\n\n${brand.name}`,
-  });
-  await notifyOwners(stay ? "stay" : "booking", {
-    subject: `New ${stay ? "stay" : "booking"}: ${what}, ${when}`,
-    text: `New ${stay ? "overnight stay" : "booking"} from ${b.customer.name}.\n\n${what}\n${when}\n${b.address}\nEstimate: ${estimate}\nPhone: ${b.customer.phone ?? "not given"}\nEmail: ${b.customer.email}\nNotes: ${b.notes || "none"}\n\nSee your bookings at ${appUrl()}/concierge`,
-  }, { fallback: b.concierge.user.email });
+  await sendEmail({ to: b.customer.email, ...bookingConfirmed(b) });
+  await notifyOwners(b.kind === "STAY" ? "stay" : "booking", ownerNewBooking(b), { fallback: b.concierge.user.email });
 }

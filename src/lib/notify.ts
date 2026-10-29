@@ -37,7 +37,7 @@ export function recipientsFor(rows: { email: string; events: string[] }[], event
 }
 
 /** Emails everyone on the admin's notification list who wants `event`. */
-export async function notifyOwners(event: NotifyEvent, email: { subject: string; text: string }, opts: { fallback?: string; exclude?: string } = {}) {
+export async function notifyOwners(event: NotifyEvent, email: { subject: string; text: string; html?: string }, opts: { fallback?: string; exclude?: string } = {}) {
   const rows = await db.notificationRecipient.findMany({ select: { email: true, events: true } });
   for (const to of recipientsFor(rows, event, opts)) await sendEmail({ to, ...email });
 }

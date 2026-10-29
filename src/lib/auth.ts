@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import type { Role } from "@prisma/client";
 import { db } from "./db";
 import { sendEmail } from "./email";
-import { brand } from "./brand";
+import { signInLink } from "./email-templates";
 
 const SESSION_COOKIE = "session";
 const SESSION_DAYS = 30;
@@ -49,11 +49,7 @@ export async function sendSignInLink(email: string, name: string | null, redirec
       expiresAt: new Date(Date.now() + LINK_MINUTES * 60_000),
     },
   });
-  await sendEmail({
-    to: normalized,
-    subject: `Your ${brand.name} sign-in link`,
-    text: `Use this link to sign in to ${brand.name}. It works once and expires in ${LINK_MINUTES} minutes.\n\n${appUrl()}/auth/verify?token=${token}\n\nIf you didn't ask for this, you can ignore this email.`,
-  });
+  await sendEmail({ to: normalized, ...signInLink(`${appUrl()}/auth/verify?token=${token}`, LINK_MINUTES) });
 }
 
 /** Exchanges a sign-in token for a session. Returns where to send the user, or null if the link is bad. */
