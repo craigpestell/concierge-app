@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { nightsBetween, stayBlockedDates, stayInterval, stayIsOpen } from "./slots";
-import { zonedToInstant } from "./time";
+import { wallTime, zonedToInstant } from "./time";
 import { validateBookingRequest, BookingError } from "./bookings";
 import { bookingWhen } from "./format";
 import { features } from "./features";
@@ -14,10 +14,12 @@ describe("stays", () => {
     expect(nightsBetween("2026-11-03", "2026-11-03")).toBe(0);
   });
 
-  it("covers every day from local midnight to local midnight, across the clocks changing", () => {
+  it("covers every day from local midnight to local midnight", () => {
+    // Checked against wall time rather than fixed UTC instants, so the test doesn't depend on
+    // the runtime's time zone data (whether clocks still change that weekend varies by tzdata).
     const s = stayInterval("2026-10-31", "2026-11-02", TZ);
-    expect(s.start.toISOString()).toBe("2026-10-31T07:00:00.000Z");
-    expect(s.end.toISOString()).toBe("2026-11-03T08:00:00.000Z");
+    expect(wallTime(s.start, TZ)).toMatchObject({ year: 2026, month: 10, day: 31, hour: 0, minute: 0 });
+    expect(wallTime(s.end, TZ)).toMatchObject({ year: 2026, month: 11, day: 3, hour: 0, minute: 0 });
   });
 
   it("blocks days with a booking or time off", () => {
