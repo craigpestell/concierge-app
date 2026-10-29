@@ -21,7 +21,7 @@ export default async function Home() {
   ]);
   const name = owner ? firstName(owner.displayName) : brand.ownerName;
   const rate = owner ? money(owner.hourlyRateCents) : null;
-  const stay = owner ? stayOffer(owner.nightlyRateCents) : null;
+  const stay = owner ? stayOffer(owner) : null;
   const bookable = owner
     ? owner.services
         .filter((s) => s.service.active)
@@ -200,7 +200,7 @@ export default async function Home() {
             <dl className="terms">
               <div><dt>Minimum booking</dt><dd>1 hour</dd></div>
               <div><dt>Longer visits</dt><dd>Book up to {Math.max(...brand.lengths)} hours at a time</dd></div>
-              {stay && <div><dt>Overnight house &amp; pet sitting</dt><dd>{money(stay.rateCents)} a night, staying at your home</dd></div>}
+              {stay && <div><dt>Overnight house &amp; pet sitting</dt><dd>{money(stay.nightlyRateCents)} a night for the overnight, plus {rate}/hour for care during the day</dd></div>}
               <div><dt>Driving outside New West &amp; Burnaby</dt><dd>Mileage extra</dd></div>
               <div><dt>Purchases made for you</dt><dd>At cost, with receipt</dd></div>
             </dl>

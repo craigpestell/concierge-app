@@ -77,3 +77,8 @@ export function stayIsOpen(first: string, last: string, busy: Interval[], timeZo
   const stay = stayInterval(first, last, timeZone);
   return !busy.some((b) => overlaps(stay, b));
 }
+
+/** A stay's estimate: each night is her flat overnight rate plus that day's waking hours of care at the hourly rate. */
+export function stayPriceCents(nights: number, careHours: number, rates: { hourlyRateCents: number; nightlyRateCents: number }) {
+  return nights * (rates.nightlyRateCents + careHours * rates.hourlyRateCents);
+}
