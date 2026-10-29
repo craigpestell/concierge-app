@@ -2,6 +2,7 @@ import { db } from "./db";
 import { brand } from "./brand";
 import { sendEmail } from "./email";
 import { whenLabel } from "./format";
+import { formatPhone } from "./phone";
 
 /** Cancels a booking and tells the other side. `by` says who cancelled. */
 export async function cancelBooking(bookingId: string, by: "customer" | "concierge" | "admin") {
@@ -22,7 +23,7 @@ export async function cancelBooking(bookingId: string, by: "customer" | "concier
     await sendEmail({
       to: b.customer.email,
       subject: `Your booking on ${when} was cancelled`,
-      text: `Sorry, your ${b.service.name} booking with ${b.concierge.displayName} on ${when} was cancelled. Please book another time, or call ${brand.phone} and we'll help.`,
+      text: `Sorry, your ${b.service.name} booking with ${b.concierge.displayName} on ${when} was cancelled. Please book another time, or call ${b.concierge.businessPhone ? formatPhone(b.concierge.businessPhone) : brand.phone} and we'll help.`,
     });
   }
   return b;

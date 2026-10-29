@@ -65,6 +65,10 @@ model ConciergeProfile {
   areas           String[]
   approved        Boolean            @default(false)
   visible         Boolean            @default(true)
+  /// Public business line shown on the site instead of brand.phone. Digits only, 10 long.
+  businessPhone   String?
+  /// Which free service the line is on ("fongo", "textnow" or "other"), for keep-alive tips.
+  phoneProvider   String?
   createdAt       DateTime           @default(now())
   services        ConciergeService[]
   availability    Availability[]
