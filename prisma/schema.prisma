@@ -148,8 +148,19 @@ model Booking {
   visitNote   String?
   completedAt DateTime?
   cancelledAt DateTime?
+  /// When the client's reminder email went out (src/lib/reminders.ts).
+  reminderSentAt DateTime?
   createdAt   DateTime         @default(now())
 
   @@index([conciergeId, start])
   @@index([customerId])
+}
+
+/// Who gets the business's own notification emails, set from /admin/notifications.
+model NotificationRecipient {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  /// Which notifications this address gets: keys from notifyEvents in src/lib/notify.ts.
+  events    String[]
+  createdAt DateTime @default(now())
 }

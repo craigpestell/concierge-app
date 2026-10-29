@@ -20,6 +20,8 @@ export const brand = {
   bookingWindowDays: 56,
   lengths: [1, 2, 3, 4],
   cancelFreeHours: 24,
+  // How far ahead clients get a reminder email. Stays get more notice to sort out keys and care notes.
+  reminderHours: { VISIT: 24, STAY: 48 },
   // Google Analytics 4 web stream. Public, not a secret. GA_MEASUREMENT_ID overrides it.
   gaMeasurementId: "G-1S4M1FYZW3",
   // Longest overnight stay that can be booked online.

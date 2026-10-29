@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { brand } from "@/lib/brand";
 import { sendEmail } from "@/lib/email";
+import { notifyOwners } from "@/lib/notify";
+import { bookingDone, ownerDone } from "@/lib/email-templates";
 import { cancelBooking } from "@/lib/booking-actions";
 import { money, bookingWhen } from "@/lib/format";
 import { myProfile } from "@/lib/my-profile";
@@ -14,17 +15,15 @@ export const metadata: Metadata = { title: "My schedule" };
 
 async function markDone(f: FormData) {
   "use server";
-  const { profile } = await myProfile();
+  const { user, profile } = await myProfile();
   const id = String(f.get("id"));
   const note = String(f.get("note") ?? "").trim().slice(0, 2000);
   const b = await db.booking.findFirst({ where: { id, conciergeId: profile.id, status: "CONFIRMED" }, include: { customer: true, service: true } });
   if (!b) return;
   await db.booking.update({ where: { id }, data: { status: "DONE", completedAt: new Date(), visitNote: note || null } });
-  await sendEmail({
-    to: b.customer.email,
-    subject: `${profile.displayName} finished your ${b.service.name.toLowerCase()} ${b.kind === "STAY" ? "stay" : "visit"}`,
-    text: `Hi ${b.customer.name},\n\n${profile.displayName} has finished your ${b.kind === "STAY" ? "stay" : "visit"}, ${bookingWhen(b)}.${note ? `\n\nTheir note:\n${note}` : ""}\n\nThanks for booking with ${brand.name}.`,
-  });
+  const full = { ...b, concierge: profile };
+  await sendEmail({ to: b.customer.email, ...bookingDone(full, note) });
+  await notifyOwners("done", ownerDone(full, note), { exclude: user.email });
   revalidatePath("/concierge", "layout");
 }
 

@@ -1,6 +1,6 @@
 import { brand } from "./brand";
 
-type Email = { to: string; subject: string; text: string };
+type Email = { to: string; subject: string; text: string; html?: string };
 
 /** Sends through Resend when RESEND_API_KEY is set; otherwise prints to the server log. */
 export async function sendEmail(email: Email) {
@@ -17,6 +17,7 @@ export async function sendEmail(email: Email) {
       to: [email.to],
       subject: email.subject,
       text: email.text,
+      ...(email.html ? { html: email.html } : {}),
     }),
   });
   if (!res.ok) console.error(`Email to ${email.to} failed: ${res.status} ${await res.text()}`);
