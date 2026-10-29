@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { BookingError, createBooking, validateBookingRequest } from "@/lib/bookings";
-import { whenLabel, money } from "@/lib/format";
+import { bookingWhen, money } from "@/lib/format";
+import { features } from "@/lib/features";
 
 export async function POST(req: Request) {
   try {
     const request = validateBookingRequest(await req.json().catch(() => null));
+    if (request.kind === "stay" && !features.stays()) throw new BookingError("Overnight stays aren't available to book online yet.");
     const b = await createBooking(request);
     return NextResponse.json({
       id: b.id,
-      when: whenLabel(b.start, b.end),
-      service: b.service.name,
+      when: bookingWhen(b),
+      service: b.kind === "STAY" ? `Overnight stay (${b.service.name.toLowerCase()})` : b.service.name,
       concierge: b.concierge.displayName,
       estimate: money(b.priceCents),
       email: b.customer.email,

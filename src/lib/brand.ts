@@ -20,4 +20,6 @@ export const brand = {
   bookingWindowDays: 56,
   lengths: [1, 2, 3, 4],
   cancelFreeHours: 24,
+  // Longest overnight stay that can be booked online.
+  maxStayNights: 30,
 } as const;

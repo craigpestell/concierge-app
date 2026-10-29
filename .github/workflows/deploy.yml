@@ -3,6 +3,8 @@ name: Deploy
 # Builds the app image, then deploys it to the droplet over SSH.
 # Needs these repository secrets: DROPLET_HOST, DROPLET_SSH_KEY, POSTGRES_PASSWORD,
 # APP_URL, SITE_ADDRESS, ADMIN_EMAILS, and optionally RESEND_API_KEY.
+# Feature flags come from repository variables (Settings > Secrets and variables > Actions > Variables),
+# e.g. FEATURE_STAYS=on. Change one, then re-run this workflow to apply it.
 on:
   push:
     branches: [main]
@@ -72,6 +74,7 @@ jobs:
           SITE_ADDRESS: ${{ secrets.SITE_ADDRESS }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          FEATURE_STAYS: ${{ vars.FEATURE_STAYS }}
         run: |
           {
             echo "APP_IMAGE=${IMAGE}:${GITHUB_SHA}"
@@ -81,6 +84,7 @@ jobs:
             echo "ADMIN_EMAILS=${ADMIN_EMAILS}"
             echo "RESEND_API_KEY=${RESEND_API_KEY}"
             echo "EMAIL_FROM=Royal City Concierge <hello@royalcityconcierge.com>"
+            echo "FEATURE_STAYS=${FEATURE_STAYS}"
           } > .env.deploy
           scp .env.deploy root@"$HOST":/opt/concierge/.env
           ssh root@"$HOST" 'chmod 600 /opt/concierge/.env'

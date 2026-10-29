@@ -47,6 +47,12 @@ npm run build
 
 Open times come from the concierge's weekly hours, minus existing bookings and time off. They start at least 12 hours from now and run up to 8 weeks out (`src/lib/slots.ts`). A booking re-checks the time inside a serializable transaction, so two people can't book the same slot.
 
+### Overnight stays (feature flag)
+
+House and pet sitting where she stays at the client's home is booked as a date range: the client taps the arrival day and the day they're back, and pays her nightly rate for each night between them. A stay blocks every day it touches, from midnight on the arrival day to midnight after the last day, so no hourly visits land on those days either. Weekly hours don't apply to stays. Stays can start tomorrow at the earliest, must end inside the 8-week window, and run up to 30 nights (`brand.maxStayNights`).
+
+Stays are off unless `FEATURE_STAYS=on`. On the droplet, set the repository variable `FEATURE_STAYS` to `on` (Settings > Secrets and variables > Actions > Variables) and re-run the Deploy workflow. Once it's on, she sets a nightly rate under Profile on `/concierge`; leaving the rate empty keeps stays off her booking page.
+
 ## Deploying (one droplet + Cloudflare)
 
 Everything runs on a single droplet from `docker-compose.yml`. Postgres is only reachable inside Docker, and the firewall allows SSH, HTTP and HTTPS. Pushing to `main` builds the image to GitHub Container Registry and deploys it (`.github/workflows/deploy.yml`). The deploy also prepares a fresh droplet with `deploy/setup-droplet.sh`.

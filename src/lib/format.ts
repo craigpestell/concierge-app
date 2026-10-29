@@ -37,3 +37,14 @@ export function slugify(s: string) {
     .replace(/^-|-$/g, "")
     .slice(0, 40);
 }
+
+export function nightsLabel(nights: number) {
+  return nights === 1 ? "1 night" : `${nights} nights`;
+}
+
+/** When a booking happens: a visit's day and times, or a stay's first and last days. */
+export function bookingWhen(b: { kind: "VISIT" | "STAY"; start: Date; end: Date; nights: number | null }) {
+  if (b.kind !== "STAY") return whenLabel(b.start, b.end);
+  // A stay ends at midnight after its last day, so step back a moment to name that day.
+  return `${dayLabel(b.start)} to ${dayLabel(new Date(b.end.getTime() - 1))} (${nightsLabel(b.nights ?? 0)})`;
+}

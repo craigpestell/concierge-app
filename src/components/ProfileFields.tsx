@@ -7,11 +7,12 @@ type Defaults = {
   bio?: string;
   photoUrl?: string | null;
   hourlyRateCents?: number;
+  nightlyRateCents?: number | null;
   areas?: string[];
   serviceIds?: string[];
 };
 
-export function ProfileFields({ services, d = {} }: { services: Service[]; d?: Defaults }) {
+export function ProfileFields({ services, d = {}, stays = false }: { services: Service[]; d?: Defaults; stays?: boolean }) {
   return (
     <>
       <div className="row">
@@ -24,6 +25,13 @@ export function ProfileFields({ services, d = {} }: { services: Service[]; d?: D
           <input id="rate" name="rate" type="number" min={20} max={200} step={1} defaultValue={(d.hourlyRateCents ?? 5000) / 100} required />
         </div>
       </div>
+      {stays && (
+        <div className="field">
+          <label htmlFor="nightlyRate">Overnight stay rate, per night ($)</label>
+          <input id="nightlyRate" name="nightlyRate" type="number" min={20} max={1000} step={1} defaultValue={d.nightlyRateCents != null ? d.nightlyRateCents / 100 : ""} />
+          <span className="hint">For house and pet sitting where you stay at the client&apos;s home. Clients pick arrival and departure days and pay this for each night. Leave empty to not offer stays online.</span>
+        </div>
+      )}
       <div className="field">
         <label htmlFor="headline">One-line introduction</label>
         <input id="headline" name="headline" maxLength={140} defaultValue={d.headline} placeholder="e.g. Errands, pet visits and rides around Sapperton" />

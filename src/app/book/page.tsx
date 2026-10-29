@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { brand } from "@/lib/brand";
 import { money } from "@/lib/format";
-import { bookingWindow } from "@/lib/availability";
+import { bookingWindow, stayOffer } from "@/lib/availability";
 import { currentUser } from "@/lib/auth";
 import { getOwner, firstName, publicPhone } from "@/lib/owner";
 import { Avatar } from "@/components/Avatar";
@@ -28,6 +28,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
     );
   }
   const user = await currentUser();
+  const stay = stayOffer(c.nightlyRateCents);
   const services = c.services
     .filter((s) => s.service.active)
     .sort((a, b) => a.service.sort - b.service.sort)
@@ -41,6 +42,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           <h1 style={{ fontSize: "var(--step-3)" }}>{c.displayName}</h1>
           {c.headline && <p className="lede" style={{ fontSize: "var(--step-0)" }}>{c.headline}</p>}
           <p className="rate">{money(c.hourlyRateCents)}/hour · paid after the visit</p>
+          {stay && <p className="muted small">Overnight house and pet sitting: {money(stay.rateCents)} a night</p>}
           <p className="muted small">Serves {c.areas.join(", ")}</p>
           <div className="tags">{services.map((s) => <span className="tag" key={s.slug}>{s.name}</span>)}</div>
           {c.bio && <p className="bio">{c.bio}</p>}
@@ -61,6 +63,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
               window={bookingWindow()}
               timeZone={brand.timeZone}
               prefill={user ? { name: user.name, email: user.email, phone: user.phone ?? "" } : null}
+              stay={stay}
             />
           ) : (
             <p className="empty">Services are being set up. Call or text {phone} to book in the meantime.</p>

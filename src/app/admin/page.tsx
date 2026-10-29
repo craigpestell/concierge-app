@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { brand } from "@/lib/brand";
 import { requireUser } from "@/lib/auth";
 import { cancelBooking } from "@/lib/booking-actions";
-import { money, whenLabel, slugify } from "@/lib/format";
+import { money, bookingWhen, slugify } from "@/lib/format";
 import { StatusPill } from "@/components/StatusPill";
 import { getOwnerProfile } from "@/lib/owner";
 
@@ -73,9 +73,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 <tbody>
                   {bookings.map((b) => (
                     <tr key={b.id}>
-                      <td>{whenLabel(b.start, b.end)}<div className="muted small">{b.address}</div></td>
+                      <td>{bookingWhen(b)}<div className="muted small">{b.address}</div></td>
                       <td>{b.customer.name}<div className="muted small">{b.customer.email}</div></td>
-                      <td>{b.service.name}<div className="muted small">{money(b.priceCents)}</div></td>
+                      <td>{b.kind === "STAY" ? `Overnight stay · ${b.service.name}` : b.service.name}<div className="muted small">{money(b.priceCents)}</div></td>
                       <td><StatusPill status={b.status} /></td>
                       <td><form action={adminCancel}><input type="hidden" name="id" value={b.id} /><button className="link-btn" type="submit">Cancel</button></form></td>
                     </tr>

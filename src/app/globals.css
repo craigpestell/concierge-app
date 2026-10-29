@@ -223,6 +223,11 @@ a.card:hover { border-color: var(--brass); }
 .cal-day:not(:disabled):hover { border-color: var(--brass); }
 .cal-day:disabled { color: color-mix(in srgb, var(--ink-soft) 55%, transparent); cursor: default; }
 .cal-day[aria-pressed="true"] { background: var(--brass); color: #fff; }
+.cal-day.in-range { background: color-mix(in srgb, var(--brass) 45%, var(--paper)); color: var(--ink); }
+.stay-dates { margin: 0; display: grid; gap: 0.6rem; }
+.stay-dates > div { display: grid; grid-template-columns: 4.8rem minmax(0, 1fr); gap: 0.6rem; }
+.stay-dates dt { color: var(--ink-soft); font-size: var(--step--1); font-weight: 600; }
+.stay-dates dd { margin: 0; font-weight: 600; }
 .slots { display: grid; gap: 0.45rem; max-height: 22rem; overflow-y: auto; }
 .slot { font-family: inherit; font-weight: 600; font-size: 0.95rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); border: 1px solid var(--rule); background: var(--paper); border-radius: 6px; padding: 0.8em; cursor: pointer; text-align: left; }
 .slot:hover { border-color: var(--brass); }

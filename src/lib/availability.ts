@@ -1,8 +1,9 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "./db";
 import { brand } from "./brand";
-import { openStarts, datesBetween, type Interval } from "./slots";
+import { openStarts, datesBetween, stayBlockedDates, type Interval } from "./slots";
 import { addDays, localDate, zonedToInstant } from "./time";
+import { features } from "./features";
 
 /** First and last bookable dates as of now. */
 export function bookingWindow(now = new Date()) {
@@ -44,4 +45,26 @@ export async function openTimesByDate(conciergeId: string, from: string, to: str
     if (starts.length) days[date] = starts.map((s) => s.toISOString());
   }
   return days;
+}
+
+/**
+ * Stay rules: a stay can start tomorrow at the earliest and must end inside the booking window.
+ * Weekly hours don't apply, since she lives in for the whole stay.
+ */
+export function stayWindow(now = new Date()) {
+  const win = bookingWindow(now);
+  return { first: addDays(win.first, 1), last: win.last, maxNights: brand.maxStayNights };
+}
+
+/** Days in the stay window that a stay can't include, because of a booking or time off. */
+export async function blockedStayDates(conciergeId: string, now = new Date()) {
+  const win = stayWindow(now);
+  const busy = await busyIntervals(conciergeId, win.first, win.last);
+  return stayBlockedDates(win.first, win.last, busy, brand.timeZone);
+}
+
+/** What the booking calendar needs to offer stays, or null when stays are off or she has no nightly rate. */
+export function stayOffer(nightlyRateCents: number | null, now = new Date()) {
+  if (!features.stays() || nightlyRateCents == null) return null;
+  return { rateCents: nightlyRateCents, ...stayWindow(now) };
 }
