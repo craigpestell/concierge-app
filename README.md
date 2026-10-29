@@ -38,10 +38,11 @@ npm run build
 | `/` | Everyone | Home page |
 | `/book` | Everyone | Michelle's profile and booking calendar |
 | `/concierges`, `/concierges/[slug]` | Everyone | Old links; redirect to `/book` |
-| `/account` | Customers | Upcoming and past bookings, cancel |
+| `/account`, `/account/past` | Customers | Tabs for upcoming bookings (cancel) and past or cancelled ones |
 | `/concierge/setup` | Admins | Set up the owner's profile once (published right away) |
-| `/concierge` | Concierges | Bookings, weekly hours, time off, profile |
-| `/admin` | Admins | See and cancel upcoming bookings, manage services |
+| `/concierge` | Concierges | "My schedule" tabs: Bookings (close out with a note, cancel) |
+| `/concierge/availability`, `/concierge/profile`, `/concierge/phone` | Concierges | Weekly hours and time off; profile and rates; business phone |
+| `/admin`, `/admin/services` | Admins | Tabs for upcoming bookings (cancel) and services (add, hide) |
 
 ## How booking works
 
@@ -51,7 +52,7 @@ Open times come from the concierge's weekly hours, minus existing bookings and t
 
 House and pet sitting where she stays at the client's home is booked as a date range: the client taps the arrival day and the day they're back, and pays her nightly rate for each night between them. A stay blocks every day it touches, from midnight on the arrival day to midnight after the last day, so no hourly visits land on those days either. Weekly hours don't apply to stays. Stays can start tomorrow at the earliest, must end inside the 8-week window, and run up to 30 nights (`brand.maxStayNights`).
 
-Stays are off unless `FEATURE_STAYS=on`. On the droplet, set the repository variable `FEATURE_STAYS` to `on` (Settings > Secrets and variables > Actions > Variables) and re-run the Deploy workflow. Once it's on, she sets a nightly rate under Profile on `/concierge`; leaving the rate empty keeps stays off her booking page.
+Stays are off unless `FEATURE_STAYS=on`. On the droplet, set the repository variable `FEATURE_STAYS` to `on` (Settings > Secrets and variables > Actions > Variables) and re-run the Deploy workflow. Once it's on, she sets a nightly rate on the Profile & rates tab (`/concierge/profile`); leaving the rate empty keeps stays off her booking page.
 
 ## Deploying (one droplet + Cloudflare)
 
