@@ -75,7 +75,7 @@ p { margin: 0; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
-  font: 600 var(--step-0)/1 inherit; font-family: inherit;
+  font-family: inherit; font-weight: 600; font-size: var(--step-0); line-height: 1;
   padding: 0.9em 1.35em; border-radius: 999px; text-decoration: none;
   border: 1.5px solid var(--ink); cursor: pointer; transition: background .2s, color .2s, border-color .2s;
   background: var(--ink); color: var(--paper);
@@ -92,13 +92,19 @@ p { margin: 0; }
 .site-header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--rule); }
 .site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 0.85rem; }
 .brand { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; }
-.brand-mark { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--brass); color: var(--brass); display: grid; place-items: center; font-family: var(--font-display), Georgia, serif; font-size: 0.95rem; letter-spacing: 0.04em; }
+.brand-mark { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--brass); color: var(--brass); display: grid; place-items: center; font-family: var(--font-display), Georgia, serif; font-size: 0.95rem; letter-spacing: 0.04em; }
 .brand-name { font-family: var(--font-display), Georgia, serif; font-size: 1.3rem; }
 .nav { display: flex; gap: 1.4rem; align-items: center; font-size: var(--step--1); font-weight: 500; flex-wrap: wrap; justify-content: flex-end; }
 .nav a { text-decoration: none; color: var(--ink-soft); }
 .nav a:hover { color: var(--ink); }
 .nav .btn { color: var(--paper); }
 @media (max-width: 760px) { .nav .hide-sm { display: none; } }
+@media (max-width: 480px) {
+  .site-header .wrap { gap: 0.75rem; }
+  .brand-name { font-size: 1.1rem; line-height: 1.15; }
+  .nav { gap: 0.9rem; flex-wrap: nowrap; }
+  .nav a { white-space: nowrap; }
+}
 .site-footer { border-top: 1px solid var(--rule); padding-block: 2.2rem; font-size: var(--step--1); color: var(--ink-soft); }
 .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem 2rem; }
 
@@ -118,8 +124,15 @@ p { margin: 0; }
 .keytag .k-area { font-size: 0.85rem; color: var(--on-harbour-soft); }
 .keytag .k-rule { width: 44px; height: 1px; background: var(--brass); margin: 1rem auto; }
 .ribbon { border-block: 1px solid var(--rule); background: var(--paper-2); }
-.ribbon ul { list-style: none; margin: 0; padding-block: 1.1rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 0; font-size: var(--step--1); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; color: var(--ink-soft); }
-.ribbon li + li::before { content: "•"; color: var(--brass); margin-inline: 0.9rem; }
+.ribbon ul { list-style: none; margin: 0; padding-block: 1.1rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.6rem; font-size: var(--step--1); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; color: var(--ink-soft); }
+/* Every item carries its own dot, so a wrapped line never starts with a stray separator. */
+.ribbon li::before { content: "•"; color: var(--brass); margin-right: 0.6rem; }
+/* On phones, list the services in a tidy left-aligned column. */
+@media (max-width: 600px) {
+  .ribbon ul { display: grid; justify-content: start; gap: 0.5rem; padding: 1.3rem 0; }
+  .ribbon li { display: flex; align-items: center; gap: 0.75rem; }
+  .ribbon li::before { content: ""; flex: none; width: 6px; height: 6px; margin: 0; border-radius: 50%; background: var(--brass); }
+}
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1.5rem, 3vw, 2.5rem); }
 @media (max-width: 760px) { .steps { grid-template-columns: minmax(0, 1fr); } }
 .step { display: grid; gap: 0.6rem; border-top: 1px solid var(--ink); padding-top: 1.2rem; }
@@ -130,7 +143,7 @@ p { margin: 0; }
 
 /* Concierge cards */
 .filters { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.6rem; }
-.chip { font: 500 0.92rem/1.2 inherit; font-family: inherit; color: var(--ink); background: var(--paper-2); border: 1px solid var(--rule); border-radius: 999px; padding: 0.55em 0.95em; cursor: pointer; text-decoration: none; }
+.chip { font-family: inherit; font-weight: 500; font-size: 0.92rem; line-height: 1.2; color: var(--ink); background: var(--paper-2); border: 1px solid var(--rule); border-radius: 999px; padding: 0.55em 0.95em; cursor: pointer; text-decoration: none; }
 .chip:hover { border-color: var(--brass); }
 .chip[aria-pressed="true"], .chip[aria-current="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 1.2rem; }
@@ -171,13 +184,13 @@ a.card:hover { border-color: var(--brass); }
 .cal-nav:disabled { opacity: 0.3; cursor: default; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.25rem; text-align: center; }
 .cal-dow { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); padding-bottom: 0.3rem; }
-.cal-day { aspect-ratio: 1; max-width: 100%; border-radius: 50%; border: 1px solid transparent; background: transparent; color: var(--ink); font: 500 0.95rem/1 inherit; font-family: inherit; font-variant-numeric: tabular-nums; cursor: pointer; }
+.cal-day { aspect-ratio: 1; max-width: 100%; border-radius: 50%; border: 1px solid transparent; background: transparent; color: var(--ink); font-family: inherit; font-weight: 500; font-size: 0.95rem; line-height: 1; font-variant-numeric: tabular-nums; cursor: pointer; }
 .cal-day:not(:disabled) { background: var(--brass-soft); }
 .cal-day:not(:disabled):hover { border-color: var(--brass); }
 .cal-day:disabled { color: color-mix(in srgb, var(--ink-soft) 55%, transparent); cursor: default; }
 .cal-day[aria-pressed="true"] { background: var(--brass); color: #fff; }
 .slots { display: grid; gap: 0.45rem; max-height: 22rem; overflow-y: auto; }
-.slot { font: 600 0.95rem/1 inherit; font-family: inherit; font-variant-numeric: tabular-nums; color: var(--ink); border: 1px solid var(--rule); background: var(--paper); border-radius: 6px; padding: 0.8em; cursor: pointer; text-align: left; }
+.slot { font-family: inherit; font-weight: 600; font-size: 0.95rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); border: 1px solid var(--rule); background: var(--paper); border-radius: 6px; padding: 0.8em; cursor: pointer; text-align: left; }
 .slot:hover { border-color: var(--brass); }
 .slot[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .bk-details { margin-top: 1.2rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); padding: clamp(1.1rem, 3vw, 1.6rem); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr); gap: clamp(1.2rem, 3vw, 2.2rem); }
@@ -245,7 +258,8 @@ td.num { font-variant-numeric: tabular-nums; }
 .svc { background: var(--paper); padding: 1.8rem 1.6rem 2rem; display: grid; gap: 0.75rem; align-content: start; }
 .svc h3 { font-size: var(--step-1); }
 .svc ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.35rem; color: var(--ink-soft); font-size: 0.98rem; }
-.svc li::before { content: "—"; color: var(--brass); margin-right: 0.5em; }
+.svc li { display: flex; gap: 0.5em; }
+.svc li::before { content: "—"; flex: none; color: var(--brass); }
 
 .families { background: var(--harbour); color: var(--on-harbour); }
 .families .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
@@ -305,5 +319,11 @@ td.num { font-variant-numeric: tabular-nums; }
 }
 @media (max-width: 600px) {
   .svc-grid, .trust-grid { grid-template-columns: minmax(0, 1fr); }
+  .svc { padding: 1.5rem 1.25rem 1.6rem; }
+  .terms div { flex-wrap: wrap; gap: 0.15rem 1rem; }
+  .terms dt { flex: 1 1 9rem; }
+  .terms dd { margin-left: auto; }
+  .contact-line { flex-direction: column; gap: 0.15rem; }
+  .contact-line .lbl { width: auto; }
 }
 .families .eyebrow, .contact .eyebrow { color: var(--brass); }
