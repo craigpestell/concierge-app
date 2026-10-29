@@ -95,15 +95,15 @@ p { margin: 0; }
 .brand-mark { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--brass); color: var(--brass); display: grid; place-items: center; font-family: var(--font-display), Georgia, serif; font-size: 0.95rem; letter-spacing: 0.04em; }
 .brand-name { font-family: var(--font-display), Georgia, serif; font-size: 1.3rem; }
 .nav { display: flex; gap: 1.4rem; align-items: center; font-size: var(--step--1); font-weight: 500; flex-wrap: wrap; justify-content: flex-end; }
-.nav a { text-decoration: none; color: var(--ink-soft); }
+.nav a { white-space: nowrap; text-decoration: none; color: var(--ink-soft); }
 .nav a:hover { color: var(--ink); }
 .nav .btn { color: var(--paper); }
-@media (max-width: 760px) { .nav .hide-sm { display: none; } }
+/* Hide the section links before they run out of room and push the nav onto two rows. */
+@media (max-width: 860px) { .nav .hide-sm { display: none; } }
 @media (max-width: 480px) {
   .site-header .wrap { gap: 0.75rem; }
   .brand-name { font-size: 1.1rem; line-height: 1.15; }
   .nav { gap: 0.9rem; flex-wrap: nowrap; }
-  .nav a { white-space: nowrap; }
 }
 .site-footer { border-top: 1px solid var(--rule); padding-block: 2.2rem; font-size: var(--step--1); color: var(--ink-soft); }
 .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem 2rem; }
