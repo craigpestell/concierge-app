@@ -22,4 +22,6 @@ export const brand = {
   cancelFreeHours: 24,
   // Google Analytics 4 web stream. Public, not a secret. GA_MEASUREMENT_ID overrides it.
   gaMeasurementId: "G-1S4M1FYZW3",
+  // Longest overnight stay that can be booked online.
+  maxStayNights: 30,
 } as const;

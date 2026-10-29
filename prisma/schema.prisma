@@ -13,6 +13,11 @@ enum Role {
   ADMIN
 }
 
+enum BookingKind {
+  VISIT /// Booked by the hour
+  STAY /// Overnight house or pet sitting, booked by the night
+}
+
 enum BookingStatus {
   CONFIRMED
   CANCELLED
@@ -53,27 +58,29 @@ model LoginToken {
 }
 
 model ConciergeProfile {
-  id              String             @id @default(cuid())
-  userId          String             @unique
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  slug            String             @unique
-  displayName     String
-  headline        String             @default("")
-  bio             String             @default("")
-  photoUrl        String?
-  hourlyRateCents Int                @default(3500)
-  areas           String[]
-  approved        Boolean            @default(false)
-  visible         Boolean            @default(true)
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug             String             @unique
+  displayName      String
+  headline         String             @default("")
+  bio              String             @default("")
+  photoUrl         String?
+  hourlyRateCents  Int                @default(3500)
+  /// Rate for an overnight stay, per night. Null means she doesn't take stays.
+  nightlyRateCents Int?
+  areas            String[]
+  approved         Boolean            @default(false)
+  visible          Boolean            @default(true)
   /// Public business line shown on the site instead of brand.phone. Digits only, 10 long.
-  businessPhone   String?
+  businessPhone    String?
   /// Which free service the line is on ("fongo", "textnow" or "other"), for keep-alive tips.
-  phoneProvider   String?
-  createdAt       DateTime           @default(now())
-  services        ConciergeService[]
-  availability    Availability[]
-  timeOff         TimeOff[]
-  bookings        Booking[]
+  phoneProvider    String?
+  createdAt        DateTime           @default(now())
+  services         ConciergeService[]
+  availability     Availability[]
+  timeOff          TimeOff[]
+  bookings         Booking[]
 }
 
 model Service {
@@ -126,9 +133,14 @@ model Booking {
   concierge   ConciergeProfile @relation(fields: [conciergeId], references: [id])
   serviceId   String
   service     Service          @relation(fields: [serviceId], references: [id])
+  kind        BookingKind      @default(VISIT)
+  /// A stay runs from local midnight on the first day to local midnight after the last day.
   start       DateTime
   end         DateTime
+  /// Booked hours for a visit; 0 for a stay.
   hours       Int
+  /// Nights for a stay; null for a visit.
+  nights      Int?
   address     String
   notes       String           @default("")
   priceCents  Int

@@ -94,16 +94,47 @@ p { margin: 0; }
 .brand { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; }
 .brand-mark { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--brass); color: var(--brass); display: grid; place-items: center; font-family: var(--font-display), Georgia, serif; font-size: 0.95rem; letter-spacing: 0.04em; }
 .brand-name { font-family: var(--font-display), Georgia, serif; font-size: 1.3rem; }
-.nav { display: flex; gap: 1.4rem; align-items: center; font-size: var(--step--1); font-weight: 500; flex-wrap: wrap; justify-content: flex-end; }
+.nav { display: flex; gap: 1.4rem; align-items: center; font-size: var(--step--1); font-weight: 500; }
 .nav a { white-space: nowrap; text-decoration: none; color: var(--ink-soft); }
 .nav a:hover { color: var(--ink); }
 .nav .btn { color: var(--paper); }
-/* Hide the section links before they run out of room and push the nav onto two rows. */
-@media (max-width: 860px) { .nav .hide-sm { display: none; } }
-@media (max-width: 480px) {
-  .site-header .wrap { gap: 0.75rem; }
-  .brand-name { font-size: 1.1rem; line-height: 1.15; }
-  .nav { gap: 0.9rem; flex-wrap: nowrap; }
+.nav-links { display: flex; gap: 1.4rem; align-items: center; }
+.nav-menu-book { display: none; }
+.nav-toggle { display: none; align-items: center; gap: 0.55rem; font: inherit; font-weight: 600; color: var(--ink); background: transparent; border: 1.5px solid var(--rule); border-radius: 999px; padding: 0.5em 0.9em; cursor: pointer; }
+.nav-toggle:hover { border-color: var(--brass); }
+.nav-toggle-bars, .nav-toggle-bars::before, .nav-toggle-bars::after { display: block; width: 16px; height: 1.5px; background: currentColor; border-radius: 1px; transition: transform .2s, opacity .2s; }
+.nav-toggle-bars { position: relative; }
+.nav-toggle-bars::before, .nav-toggle-bars::after { content: ""; position: absolute; left: 0; }
+.nav-toggle-bars::before { top: -5px; }
+.nav-toggle-bars::after { top: 5px; }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars { background: transparent; }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars::before { transform: translateY(5px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bars::after { transform: translateY(-5px) rotate(-45deg); }
+
+/* Header breakpoints:
+   960px and up: every link inline.
+   600-959px: brand, Book a time and a menu button; the links drop down from the header.
+   under 600px: brand and menu button only; Book a time moves to the top of the menu.
+   under 380px: the menu button shows just its icon. */
+@media (max-width: 959px) {
+  .nav { gap: 0.75rem; }
+  .nav-toggle { display: inline-flex; }
+  .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 0; padding: 0.4rem var(--gutter) 1.2rem; background: var(--paper); border-bottom: 1px solid var(--rule); box-shadow: 0 18px 30px -24px rgba(10, 25, 28, 0.45); }
+  .nav-links[data-open="true"] { display: flex; }
+  .nav-links a:not(.btn) { font-size: var(--step-0); color: var(--ink); padding-block: 0.85rem; border-bottom: 1px solid var(--rule); }
+}
+@media (max-width: 599px) {
+  .site-header .wrap { padding-block: 0.7rem; }
+  .brand { gap: 0.55rem; min-width: 0; }
+  .brand-mark { width: 32px; height: 32px; font-size: 0.85rem; }
+  .brand-name { font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-book { display: none; }
+  .nav-menu-book { display: inline-flex; order: -1; margin-block: 0.6rem 0.4rem; }
+}
+/* Very narrow phones: the menu button drops its word so the full business name still fits. */
+@media (max-width: 379px) {
+  .nav-toggle { width: 2.6rem; height: 2.6rem; padding: 0; justify-content: center; }
+  .nav-toggle-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 .site-footer { border-top: 1px solid var(--rule); padding-block: 2.2rem; font-size: var(--step--1); color: var(--ink-soft); }
 .site-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem 2rem; }
@@ -202,6 +233,11 @@ a.card:hover { border-color: var(--brass); }
 .cal-day:not(:disabled):hover { border-color: var(--brass); }
 .cal-day:disabled { color: color-mix(in srgb, var(--ink-soft) 55%, transparent); cursor: default; }
 .cal-day[aria-pressed="true"] { background: var(--brass); color: #fff; }
+.cal-day.in-range { background: color-mix(in srgb, var(--brass) 45%, var(--paper)); color: var(--ink); }
+.stay-dates { margin: 0; display: grid; gap: 0.6rem; }
+.stay-dates > div { display: grid; grid-template-columns: 4.8rem minmax(0, 1fr); gap: 0.6rem; }
+.stay-dates dt { color: var(--ink-soft); font-size: var(--step--1); font-weight: 600; }
+.stay-dates dd { margin: 0; font-weight: 600; }
 .slots { display: grid; gap: 0.45rem; max-height: 22rem; overflow-y: auto; }
 .slot { font-family: inherit; font-weight: 600; font-size: 0.95rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); border: 1px solid var(--rule); background: var(--paper); border-radius: 6px; padding: 0.8em; cursor: pointer; text-align: left; }
 .slot:hover { border-color: var(--brass); }

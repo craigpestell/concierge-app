@@ -9,12 +9,14 @@ export type ProfileInput = {
   bio: string;
   photoUrl: string | null;
   hourlyRateCents: number;
+  /** Undefined leaves the saved rate alone (the stays flag is off); null means no stays. */
+  nightlyRateCents?: number | null;
   areas: string[];
   serviceIds: string[];
 };
 
 /** Reads and checks the shared profile fields from a form. Returns an error message or the values. */
-export function readProfileForm(f: FormData): { error: string } | { value: ProfileInput } {
+export function readProfileForm(f: FormData, stays = false): { error: string } | { value: ProfileInput } {
   const displayName = String(f.get("displayName") ?? "").trim().slice(0, 80);
   const headline = String(f.get("headline") ?? "").trim().slice(0, 140);
   const bio = String(f.get("bio") ?? "").trim().slice(0, 2000);
@@ -26,8 +28,15 @@ export function readProfileForm(f: FormData): { error: string } | { value: Profi
   if (!Number.isFinite(rate) || rate < 20 || rate > 200) return { error: "Set an hourly rate between $20 and $200." };
   if (!areas.length) return { error: "Choose at least one area." };
   if (!serviceIds.length) return { error: "Choose at least one service." };
+  let nightlyRateCents: number | null | undefined;
+  if (stays) {
+    const raw = String(f.get("nightlyRate") ?? "").trim();
+    const nightly = Number(raw);
+    if (raw && (!Number.isFinite(nightly) || nightly < 20 || nightly > 1000)) return { error: "Set a nightly rate between $20 and $1000, or leave it empty if you don't take stays." };
+    nightlyRateCents = raw ? Math.round(nightly * 100) : null;
+  }
   if (photo && !/^https:\/\/\S+$/.test(photo)) return { error: "The photo link must start with https://" };
-  return { value: { displayName, headline, bio, photoUrl: photo || null, hourlyRateCents: Math.round(rate * 100), areas, serviceIds } };
+  return { value: { displayName, headline, bio, photoUrl: photo || null, hourlyRateCents: Math.round(rate * 100), nightlyRateCents, areas, serviceIds } };
 }
 
 export async function uniqueSlug(name: string, excludeId?: string) {
