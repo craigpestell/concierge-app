@@ -20,4 +20,6 @@ export const brand = {
   bookingWindowDays: 56,
   lengths: [1, 2, 3, 4],
   cancelFreeHours: 24,
+  // Google Analytics 4 web stream. Public, not a secret. GA_MEASUREMENT_ID overrides it.
+  gaMeasurementId: "G-1S4M1FYZW3",
 } as const;

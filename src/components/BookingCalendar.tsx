@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { events, track } from "@/lib/analytics";
 
 type Props = {
   slug: string;
@@ -42,6 +43,13 @@ export function BookingCalendar(p: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState<Done | null>(null);
+  // booking_start fires once per booking, on the first choice the visitor makes.
+  const started = useRef(false);
+  const markStarted = (svc = service) => {
+    if (started.current) return;
+    started.current = true;
+    track(events.bookingStart, { booking_type: "visit", service: svc });
+  };
 
   const fmt = useMemo(
     () => ({
@@ -106,12 +114,14 @@ export function BookingCalendar(p: Props) {
       const body = await r.json();
       if (!r.ok) {
         setError(body.error ?? "Something went wrong. Please try again.");
+        track(events.bookingError, { booking_type: "visit", reason: r.status === 409 ? "slot_taken" : `http_${r.status}` });
         if (r.status === 409 || /taken/i.test(body.error ?? "")) {
           setStart(null);
           setReloadKey((k) => k + 1);
         }
         return;
       }
+      track(events.bookingComplete, { booking_type: "visit", service, hours, value: (p.rateCents * hours) / 100, currency: "CAD" });
       setDone(body);
     } catch {
       setError("Couldn't reach the server. Check your connection and try again.");
@@ -135,6 +145,7 @@ export function BookingCalendar(p: Props) {
             type="button"
             onClick={() => {
               setDone(null);
+              started.current = false;
               setDate(null);
               setStart(null);
               setReloadKey((k) => k + 1);
@@ -154,7 +165,7 @@ export function BookingCalendar(p: Props) {
           <div className="bk-step"><b>1</b> What do you need?</div>
           <div className="chips" role="group" aria-label="Service">
             {p.services.map((s) => (
-              <button key={s.slug} type="button" className="chip" aria-pressed={s.slug === service} onClick={() => setService(s.slug)}>
+              <button key={s.slug} type="button" className="chip" aria-pressed={s.slug === service} onClick={() => { markStarted(s.slug); setService(s.slug); }}>
                 {s.name}
               </button>
             ))}
@@ -162,7 +173,7 @@ export function BookingCalendar(p: Props) {
           <div className="bk-label" id="len-label">How long?</div>
           <div className="chips" role="group" aria-labelledby="len-label">
             {p.lengths.map((h) => (
-              <button key={h} type="button" className="chip" aria-pressed={h === hours} onClick={() => setHours(h)}>
+              <button key={h} type="button" className="chip" aria-pressed={h === hours} onClick={() => { markStarted(); setHours(h); }}>
                 {h === 1 ? "1 hour" : `${h} hours`}
               </button>
             ))}
@@ -194,6 +205,7 @@ export function BookingCalendar(p: Props) {
                   aria-pressed={d === date}
                   aria-label={`${dayLabel(d)}${open ? "" : ", no open times"}`}
                   onClick={() => {
+                    markStarted();
                     setDate(d);
                     setStart(null);
                   }}
