@@ -56,7 +56,8 @@ fetch_release_files() {
   dir="$STATE/releases/$sha"
   mkdir -p "$dir/deploy"
   for f in docker-compose.yml deploy/Caddyfile deploy/backup.sh deploy/pull-deploy.sh; do
-    curl -fsS -o "$dir/$f" "https://raw.githubusercontent.com/$REPO/$sha/$f"
+    # Commits from before pull deploys have no pull-deploy.sh; that's fine for a rollback.
+    curl -fsS -o "$dir/$f" "https://raw.githubusercontent.com/$REPO/$sha/$f" || [ "$f" = deploy/pull-deploy.sh ]
   done
 }
 
