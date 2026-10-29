@@ -1,0 +1,10 @@
+# Runs one pull deploy (deploy/pull-deploy.sh). Started by concierge-deploy.timer.
+[Unit]
+Description=Deploy the newest green commit of concierge-app
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/concierge-deploy
+TimeoutStartSec=20min

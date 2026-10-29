@@ -1,13 +1,13 @@
-name: Deploy
+name: Droplet setup
 
-# Builds the app image, then deploys it to the droplet over SSH.
+# Run by hand (Actions > Droplet setup > Run workflow) to prepare a droplet, install pull
+# deploys, or apply new settings. It does not deploy code: the droplet does that itself,
+# checking every 5 minutes for a newer commit on main whose CI passed (deploy/pull-deploy.sh).
 # Needs these repository secrets: DROPLET_HOST, DROPLET_SSH_KEY, POSTGRES_PASSWORD,
 # APP_URL, SITE_ADDRESS, ADMIN_EMAILS, and optionally RESEND_API_KEY.
 # Feature flags come from repository variables (Settings > Secrets and variables > Actions > Variables),
-# e.g. FEATURE_STAYS=on. Change one, then re-run this workflow to apply it.
+# e.g. FEATURE_STAYS=on. Change one, then run this workflow to apply it.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -16,58 +16,33 @@ concurrency:
 
 permissions:
   contents: read
-  packages: write
-
-env:
-  IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
-  image:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.IMAGE }}:latest
-            ${{ env.IMAGE }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
   droplet:
-    needs: image
     runs-on: ubuntu-latest
     env:
       HOST: ${{ secrets.DROPLET_HOST }}
     steps:
-      - name: Skip until the droplet is configured
+      - name: Stop if the droplet isn't configured
         if: env.HOST == ''
-        run: echo "::notice::DROPLET_HOST is not set, so the image was built but not deployed."
+        run: |
+          echo "::error::DROPLET_HOST is not set. Run deploy/create-droplet.sh first."
+          exit 1
       - uses: actions/checkout@v4
-        if: env.HOST != ''
       - name: Set up SSH
-        if: env.HOST != ''
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
-      - name: Prepare the server and copy config
-        if: env.HOST != ''
+      - name: Copy config and install pull deploys
         run: |
-          ssh root@"$HOST" 'sh -s' < deploy/setup-droplet.sh
+          ssh root@"$HOST" 'mkdir -p /opt/concierge/deploy /opt/concierge/backups'
           scp docker-compose.yml root@"$HOST":/opt/concierge/
-          scp deploy/Caddyfile deploy/backup.sh root@"$HOST":/opt/concierge/deploy/
+          scp deploy/Caddyfile deploy/backup.sh deploy/pull-deploy.sh \
+            deploy/concierge-deploy.service deploy/concierge-deploy.timer root@"$HOST":/opt/concierge/deploy/
+          ssh root@"$HOST" 'sh -s' < deploy/setup-droplet.sh
       - name: Write settings
-        if: env.HOST != ''
         env:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           APP_URL: ${{ secrets.APP_URL }}
@@ -77,7 +52,6 @@ jobs:
           FEATURE_STAYS: ${{ vars.FEATURE_STAYS }}
         run: |
           {
-            echo "APP_IMAGE=${IMAGE}:${GITHUB_SHA}"
             echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
             echo "APP_URL=${APP_URL}"
             echo "SITE_ADDRESS=${SITE_ADDRESS:-:80}"
@@ -86,26 +60,10 @@ jobs:
             echo "EMAIL_FROM=Royal City Concierge <hello@royalcityconcierge.com>"
             echo "FEATURE_STAYS=${FEATURE_STAYS}"
           } > .env.deploy
-          scp .env.deploy root@"$HOST":/opt/concierge/.env
-          ssh root@"$HOST" 'chmod 600 /opt/concierge/.env'
+          scp .env.deploy root@"$HOST":/opt/concierge/.env.new
           rm .env.deploy
-      - name: Start the new version
-        if: env.HOST != ''
-        run: |
-          ssh root@"$HOST" "echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin \
-            && cd /opt/concierge \
-            && docker compose pull app \
-            && docker compose up -d --no-build --remove-orphans \
-            && docker logout ghcr.io \
-            && docker image prune -f"
-      - name: Check the site responds
-        if: env.HOST != ''
-        run: |
-          for i in $(seq 1 30); do
-            if ssh root@"$HOST" 'docker compose -f /opt/concierge/docker-compose.yml exec -T app node -e "fetch(\"http://localhost:3000/api/health\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"'; then
-              echo "Healthy"; exit 0
-            fi
-            sleep 5
-          done
-          ssh root@"$HOST" 'cd /opt/concierge && docker compose logs --tail 50 app'
-          exit 1
+          # Keep the live release's APP_IMAGE line; the pull deploy owns it.
+          ssh root@"$HOST" 'cd /opt/concierge && { cat .env.new; grep "^APP_IMAGE=" .env 2>/dev/null || true; } > .env.tmp \
+            && chmod 600 .env.tmp && mv .env.tmp .env && rm .env.new'
+      - name: Apply settings, or deploy main on a fresh droplet
+        run: ssh root@"$HOST" 'concierge-deploy --reapply && concierge-deploy --status'
