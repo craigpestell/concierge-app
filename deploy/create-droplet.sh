@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates the droplet, its SSH key and its firewall with doctl, then stores the
-# deploy settings as GitHub secrets and starts the first deploy. Safe to re-run:
-# anything that already exists is left alone.
+# deploy settings as GitHub secrets and starts the Droplet setup workflow, which
+# deploys main. Safe to re-run: anything that already exists is left alone.
 #
 #   ./deploy/create-droplet.sh
 #
@@ -86,12 +86,12 @@ if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
     gh secret set ADMIN_EMAILS --repo "$GITHUB_REPO" --body "$admins"
   fi
 
-  say "Starting the deploy"
+  say "Starting the Droplet setup workflow"
   if gh workflow run deploy.yml --repo "$GITHUB_REPO" >/dev/null 2>&1; then
-    echo "Deploy started. Watch it with: gh run watch --repo $GITHUB_REPO"
+    echo "Setup started; it deploys the newest green commit on main. Watch it with: gh run watch --repo $GITHUB_REPO"
     echo "Then open: http://$ip"
   else
-    echo "Couldn't start the Deploy workflow. It runs from main, so merge the PR that adds it, then run:"
+    echo "Couldn't start the Droplet setup workflow. It runs from main, so merge the PR that adds it, then run:"
     echo "  gh workflow run deploy.yml --repo $GITHUB_REPO"
   fi
 else
@@ -104,5 +104,5 @@ else
   echo "  APP_URL            http://$ip"
   echo "  SITE_ADDRESS       :80"
   echo "  ADMIN_EMAILS       comma-separated admin emails"
-  echo "Then run the Deploy workflow from the Actions tab."
+  echo "Then run the Droplet setup workflow from the Actions tab."
 fi

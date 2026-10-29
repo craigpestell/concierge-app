@@ -1,0 +1,11 @@
+# Checks for a new green commit on main every 5 minutes.
+[Unit]
+Description=Check for a new concierge-app release every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+
+[Install]
+WantedBy=timers.target
