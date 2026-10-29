@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nightsBetween, stayBlockedDates, stayInterval, stayIsOpen } from "./slots";
+import { nightsBetween, stayBlockedDates, stayInterval, stayIsOpen, stayPriceCents } from "./slots";
 import { wallTime, zonedToInstant } from "./time";
 import { validateBookingRequest, BookingError } from "./bookings";
 import { bookingWhen } from "./format";
@@ -34,6 +34,11 @@ describe("stays", () => {
     expect(stayIsOpen("2026-11-10", "2026-11-12", busy, TZ)).toBe(true);
   });
 
+  it("prices each night as the overnight rate plus waking hours of care", () => {
+    // 9 nights, 3 care hours a day at $50/hr, $90 overnight: 9 × ($150 + $90).
+    expect(stayPriceCents(9, 3, { hourlyRateCents: 5000, nightlyRateCents: 9000 })).toBe(216_000);
+  });
+
   it("labels a stay by its first and last days", () => {
     const s = stayInterval("2026-11-03", "2026-11-12", TZ);
     expect(bookingWhen({ kind: "STAY", ...s, nights: 9 })).toBe("Tuesday, November 3 to Thursday, November 12 (9 nights)");
@@ -44,17 +49,23 @@ describe("validateBookingRequest", () => {
   const contact = { conciergeSlug: "michelle", serviceSlug: "pets-plants", name: "Sam", email: "sam@example.com", address: "1 Main St" };
 
   it("reads a stay", () => {
-    expect(validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-03", lastDay: "2026-11-12" })).toMatchObject({
+    expect(validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-03", lastDay: "2026-11-12", careHours: 3 })).toMatchObject({
       kind: "stay",
+      careHours: 3,
       firstDay: "2026-11-03",
       lastDay: "2026-11-12",
     });
   });
 
+  it("rejects care hours outside 1 to 16", () => {
+    expect(() => validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-03", lastDay: "2026-11-05" })).toThrow(/hours of care/);
+    expect(() => validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-03", lastDay: "2026-11-05", careHours: 17 })).toThrow(/hours of care/);
+  });
+
   it("rejects stays with no nights or too many", () => {
-    expect(() => validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-03", lastDay: "2026-11-03" })).toThrow(BookingError);
-    expect(() => validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-01", lastDay: "2026-12-15" })).toThrow(/up to 30 nights/);
-    expect(() => validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-31", lastDay: "2026-12-02" })).toThrow(BookingError);
+    expect(() => validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-03", lastDay: "2026-11-03", careHours: 3 })).toThrow(BookingError);
+    expect(() => validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-01", lastDay: "2026-12-15", careHours: 3 })).toThrow(/up to 30 nights/);
+    expect(() => validateBookingRequest({ ...contact, kind: "stay", firstDay: "2026-11-31", lastDay: "2026-12-02", careHours: 3 })).toThrow(BookingError);
   });
 
   it("still reads an hourly visit when no kind is sent", () => {

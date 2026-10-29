@@ -50,9 +50,9 @@ Open times come from the concierge's weekly hours, minus existing bookings and t
 
 ### Overnight stays (feature flag)
 
-House and pet sitting where she stays at the client's home is booked as a date range: the client taps the arrival day and the day they're back, and pays her nightly rate for each night between them. A stay blocks every day it touches, from midnight on the arrival day to midnight after the last day, so no hourly visits land on those days either. Weekly hours don't apply to stays. Stays can start tomorrow at the earliest, must end inside the 8-week window, and run up to 30 nights (`brand.maxStayNights`).
+House and pet sitting where she stays at the client's home is booked as a date range: the client taps the arrival day and the day they're back, and estimates how many waking hours of care each day needs (1 to 16, `brand.stayCareHours`). Each night is priced as those hours at her hourly rate plus her flat overnight rate, which covers the roughly 8 hours she sleeps there; the estimate is what the client sees, and she bills the hours actually worked. The care hours are stored in `Booking.hours`. A stay blocks every day it touches, from midnight on the arrival day to midnight after the last day, so no hourly visits land on those days either. Weekly hours don't apply to stays. Stays can start tomorrow at the earliest, must end inside the 8-week window, and run up to 30 nights (`brand.maxStayNights`).
 
-Stays are off unless `FEATURE_STAYS=on`. On the droplet, set the repository variable `FEATURE_STAYS` to `on` (Settings > Secrets and variables > Actions > Variables) and re-run the Deploy workflow. Once it's on, she sets a nightly rate on the Profile & rates tab (`/concierge/profile`); leaving the rate empty keeps stays off her booking page.
+Stays are off unless `FEATURE_STAYS=on`. On the droplet, set the repository variable `FEATURE_STAYS` to `on` (Settings > Secrets and variables > Actions > Variables) and re-run the Deploy workflow. Once it's on, she sets an overnight rate on the Profile & rates tab (`/concierge/profile`); leaving the rate empty keeps stays off her booking page.
 
 ## Deploying (one droplet + Cloudflare)
 

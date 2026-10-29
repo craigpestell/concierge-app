@@ -28,7 +28,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
     );
   }
   const user = await currentUser();
-  const stay = stayOffer(c.nightlyRateCents);
+  const stay = stayOffer(c);
   const services = c.services
     .filter((s) => s.service.active)
     .sort((a, b) => a.service.sort - b.service.sort)
@@ -42,7 +42,7 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           <h1 style={{ fontSize: "var(--step-3)" }}>{c.displayName}</h1>
           {c.headline && <p className="lede" style={{ fontSize: "var(--step-0)" }}>{c.headline}</p>}
           <p className="rate">{money(c.hourlyRateCents)}/hour · paid after the visit</p>
-          {stay && <p className="muted small">Overnight house and pet sitting: {money(stay.rateCents)} a night</p>}
+          {stay && <p className="muted small">Overnight house and pet sitting: {money(stay.nightlyRateCents)} a night, plus the hourly rate for care during the day</p>}
           <p className="muted small">Serves {c.areas.join(", ")}</p>
           <div className="tags">{services.map((s) => <span className="tag" key={s.slug}>{s.name}</span>)}</div>
           {c.bio && <p className="bio">{c.bio}</p>}

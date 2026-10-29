@@ -14,7 +14,14 @@ type Props = {
   timeZone: string;
   prefill: { name: string; email: string; phone: string } | null;
   /** Overnight stays, when the feature is on and she has a nightly rate. */
-  stay?: { rateCents: number; first: string; last: string; maxNights: number } | null;
+  stay?: {
+    nightlyRateCents: number;
+    hourlyRateCents: number;
+    careHours: { min: number; max: number; default: number };
+    first: string;
+    last: string;
+    maxNights: number;
+  } | null;
 };
 
 type Done = { when: string; service: string; concierge: string; estimate: string; email: string };
@@ -59,6 +66,7 @@ export function BookingCalendar(p: Props) {
   const [firstDay, setFirstDay] = useState<string | null>(null);
   const [lastDay, setLastDay] = useState<string | null>(null);
   const stay = mode === "stay" && p.stay ? p.stay : null;
+  const [careHours, setCareHours] = useState(p.stay?.careHours.default ?? 3);
 
   // booking_start fires once per booking, when the visitor first picks a day.
   const started = useRef(false);
@@ -131,7 +139,9 @@ export function BookingCalendar(p: Props) {
   const serviceName = p.services.find((s) => s.slug === service)?.name ?? "";
   const nights = firstDay && lastDay ? nightsBetween(firstDay, lastDay) : 0;
   const ready = stay ? nights > 0 : Boolean(date && start);
-  const estimateCents = stay ? stay.rateCents * nights : p.rateCents * hours;
+  // Each night of a stay: her flat overnight rate plus the day's waking hours of care at the hourly rate.
+  const perDayCents = stay ? stay.nightlyRateCents + careHours * stay.hourlyRateCents : 0;
+  const estimateCents = stay ? perDayCents * nights : p.rateCents * hours;
 
   const stayDayOpen = (d: string) => Boolean(stay && blocked && d >= stay.first && d <= stay.last && !blocked.has(d));
   /** Whether a stay from the picked arrival day can run through `d`. */
@@ -174,7 +184,7 @@ export function BookingCalendar(p: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           stay
-            ? { kind: "stay", conciergeSlug: p.slug, serviceSlug: service, firstDay, lastDay, ...form }
+            ? { kind: "stay", conciergeSlug: p.slug, serviceSlug: service, firstDay, lastDay, careHours, ...form }
             : { kind: "visit", conciergeSlug: p.slug, serviceSlug: service, start, hours, ...form },
         ),
       });
@@ -192,7 +202,7 @@ export function BookingCalendar(p: Props) {
       track(events.bookingComplete, {
         booking_type: mode,
         service,
-        ...(stay ? { nights } : { hours }),
+        ...(stay ? { nights, hours: careHours } : { hours }),
         value: estimateCents / 100,
         currency: "CAD",
       });
@@ -256,10 +266,18 @@ export function BookingCalendar(p: Props) {
             </>
           )}
           {stay ? (
-            <p className="bk-est">
-              {nights ? <>Estimate: <strong>{money(estimateCents)}</strong> ({nights} × {money(stay.rateCents)}/night). </> : <><strong>{money(stay.rateCents)}</strong> per night. </>}
-              {firstName(p.conciergeName)} stays at your home to look after pets, plants and the house while you&apos;re away.
-            </p>
+            <>
+              <label className="bk-label" htmlFor="care-hours">Hours of care a day, roughly</label>
+              <select id="care-hours" className="bk-select" value={careHours} onChange={(e) => setCareHours(Number(e.target.value))}>
+                {Array.from({ length: stay.careHours.max - stay.careHours.min + 1 }, (_, i) => stay.careHours.min + i).map((h) => (
+                  <option key={h} value={h}>{h === 1 ? "1 hour" : `${h} hours`}</option>
+                ))}
+              </select>
+              <p className="bk-est">
+                Each day: <strong>{money(perDayCents)}</strong> ({careHours} × {money(stay.hourlyRateCents)}/hr for walks, feeding and care, plus {money(stay.nightlyRateCents)} for the overnight).
+                {nights > 0 && <> Estimate for {nightsLabel(nights)}: <strong>{money(estimateCents)}</strong>.</>} You pay for the hours actually worked.
+              </p>
+            </>
           ) : (
             <>
               <div className="bk-label" id="len-label">How long?</div>
@@ -396,7 +414,7 @@ export function BookingCalendar(p: Props) {
             {stay ? (
               <>
                 <div><dt>When</dt><dd>{ready ? `${dayLabel(firstDay!)} to ${dayLabel(lastDay!)}` : "Choose your dates"}</dd></div>
-                <div><dt>Estimate</dt><dd>{ready ? `${money(estimateCents)} for ${nightsLabel(nights)}` : `${money(stay.rateCents)} per night`}</dd></div>
+                <div><dt>Estimate</dt><dd>{ready ? `${money(estimateCents)} for ${nightsLabel(nights)}` : `${money(perDayCents)} a day`}</dd></div>
               </>
             ) : (
               <>
