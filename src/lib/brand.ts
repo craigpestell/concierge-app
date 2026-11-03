@@ -5,10 +5,15 @@ export const brand = {
   monogram: "RC",
   tagline: "Your time, thoughtfully handled.",
   area: "New Westminster & Burnaby",
+  // The one public address of the site. Canonical links, the sitemap and social cards use it,
+  // so search engines never index a preview or www copy.
+  url: "https://royalcityconcierge.com",
+  // Short title for search results and link previews (keep it under about 65 characters).
+  seoTitle: "Royal City Concierge · House & pet sitting, New Westminster",
   // Shown when her profile isn't set up yet; otherwise the profile's name is used.
   ownerName: "Michelle",
   description:
-    "A bespoke personal concierge in New Westminster and Burnaby. One dedicated person for errands, appointments, home and pet care, and the details that fill your week.",
+    "Trusted house and pet sitting, errands and personal concierge help in New Westminster and Burnaby, BC. One dedicated local person for your home, pets and to-do list.",
   // Placeholder contact details. Replace before launch.
   phone: "604-555-0142",
   email: "hello@royalcityconcierge.com",

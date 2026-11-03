@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { brand } from "@/lib/brand";
 import { db } from "@/lib/db";
@@ -9,8 +10,11 @@ import { telHref } from "@/lib/phone";
 import { serviceGroups, familyVisit, notIncluded, faqs } from "@/lib/content";
 import { Avatar } from "@/components/Avatar";
 import { BookingCalendar } from "@/components/BookingCalendar";
+import { businessJsonLd, jsonLdScript } from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function Home() {
   const [owner, services, user, phone] = await Promise.all([
@@ -29,8 +33,16 @@ export default async function Home() {
         .map((s) => ({ slug: s.service.slug, name: s.service.name }))
     : [];
 
+  const jsonLd = businessJsonLd({
+    // Until her business line is saved the site shows a placeholder, which must not reach search engines.
+    phone: phone === brand.phone ? null : phone,
+    rateCents: owner?.hourlyRateCents ?? null,
+    services: ["House sitting", "Pet sitting", ...services.map((s) => s.name)].filter((n, i, all) => all.indexOf(n) === i),
+  });
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <section className="hero" aria-labelledby="hero-title">
         <div className="wrap">
           <div>

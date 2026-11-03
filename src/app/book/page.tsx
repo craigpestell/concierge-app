@@ -11,7 +11,12 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const c = await getOwner();
-  return { title: c ? `Book ${firstName(c.displayName)}` : "Book" };
+  const who = c ? firstName(c.displayName) : brand.ownerName;
+  return {
+    title: `Book ${who}`,
+    description: `Book house and pet sitting, errands or concierge help with ${who} in ${brand.area}. Pick a time on her calendar and get an email confirmation right away.`,
+    alternates: { canonical: "/book" },
+  };
 }
 
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ service?: string }> }) {

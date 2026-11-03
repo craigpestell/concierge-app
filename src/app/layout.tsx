@@ -12,8 +12,18 @@ const display = Marcellus({ weight: "400", subsets: ["latin"], variable: "--font
 const body = Figtree({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
-  title: { default: brand.name, template: `%s · ${brand.name}` },
+  metadataBase: new URL(brand.url),
+  title: { default: brand.seoTitle, template: `%s · ${brand.name}` },
   description: brand.description,
+  applicationName: brand.name,
+  openGraph: {
+    type: "website",
+    siteName: brand.name,
+    locale: "en_CA",
+    title: brand.seoTitle,
+    description: brand.description,
+  },
+  twitter: { card: "summary_large_image", title: brand.seoTitle, description: brand.description },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
