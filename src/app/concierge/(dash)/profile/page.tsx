@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { readProfileForm, uniqueSlug } from "@/lib/profile-form";
+import { readProfileForm } from "@/lib/profile-form";
+import { tryEdit, updateProfile } from "@/lib/site-edits";
 import { features } from "@/lib/features";
 import { myProfile } from "@/lib/my-profile";
 import { ProfileFields } from "@/components/ProfileFields";
@@ -16,27 +16,8 @@ async function saveProfile(f: FormData) {
   const { profile } = await myProfile(HERE);
   const read = readProfileForm(f, features.stays());
   if ("error" in read) redirect(`${HERE}?error=${encodeURIComponent(read.error)}`);
-  const v = read.value;
-  const slug = v.displayName === profile.displayName ? profile.slug : await uniqueSlug(v.displayName, profile.id);
-  await db.$transaction([
-    db.conciergeService.deleteMany({ where: { conciergeId: profile.id } }),
-    db.conciergeProfile.update({
-      where: { id: profile.id },
-      data: {
-        slug,
-        displayName: v.displayName,
-        headline: v.headline,
-        bio: v.bio,
-        photoUrl: v.photoUrl,
-        hourlyRateCents: v.hourlyRateCents,
-        nightlyRateCents: v.nightlyRateCents,
-        areas: v.areas,
-        visible: f.get("visible") === "on",
-        services: { create: v.serviceIds.map((serviceId) => ({ serviceId })) },
-      },
-    }),
-  ]);
-  revalidatePath("/", "layout");
+  const error = await tryEdit(() => updateProfile(profile, read.value, f.get("visible") === "on"));
+  if (error) redirect(`${HERE}?error=${encodeURIComponent(error)}`);
   redirect(`${HERE}?saved=1`);
 }
 

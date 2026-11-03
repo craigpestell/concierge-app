@@ -32,6 +32,7 @@ export default async function ScheduleLayout({ children }: { children: ReactNode
               { href: "/concierge/availability", label: "Hours & time off" },
               { href: "/concierge/profile", label: "Profile & rates" },
               { href: "/concierge/phone", label: "Business phone" },
+              { href: "/concierge/assistant", label: "AI assistant" },
             ]}
           />
         </div>
