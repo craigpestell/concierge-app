@@ -1,7 +1,8 @@
-// Runs once when the server starts. The site is a single container, so a timer here is
-// enough to send booking reminders without a separate cron.
+// Runs once when the server starts. On the droplet the site is a single container, so a timer
+// here is enough to send booking reminders without a separate cron. On Vercel, functions don't
+// stay running, so Vercel Cron calls /api/cron/reminders instead.
 export async function register() {
-  if (process.env.NEXT_RUNTIME !== "nodejs" || process.env.REMINDERS === "off") return;
+  if (process.env.NEXT_RUNTIME !== "nodejs" || process.env.REMINDERS === "off" || process.env.VERCEL) return;
   const { sendDueReminders } = await import("./lib/reminders");
   const run = () =>
     sendDueReminders()
