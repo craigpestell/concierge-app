@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -7,6 +8,9 @@ import { DashTabs } from "@/components/DashTabs";
 
 // Shared frame for "My schedule": her name, a link to the public booking page, and the section tabs.
 // /concierge/setup sits outside this group because it runs before a profile exists.
+// Signed-in pages stay out of search results.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
+
 export default async function ScheduleLayout({ children }: { children: ReactNode }) {
   const { profile } = await myProfile();
   const toCloseOut = await db.booking.count({ where: { conciergeId: profile.id, status: "CONFIRMED", start: { lte: new Date() } } });

@@ -7,7 +7,7 @@ import { readProfileForm, uniqueSlug } from "@/lib/profile-form";
 import { features } from "@/lib/features";
 import { ProfileFields } from "@/components/ProfileFields";
 
-export const metadata: Metadata = { title: "Set up your profile" };
+export const metadata: Metadata = { title: "Set up your profile", robots: { index: false, follow: false } };
 
 const DEFAULT_HOURS = [1, 2, 3, 4, 5].map((weekday) => ({ weekday, startMin: 9 * 60, endMin: 17 * 60 }));
 
