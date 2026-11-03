@@ -35,6 +35,8 @@ model User {
   bookings    Booking[]
   sessions    Session[]
   loginTokens LoginToken[]
+  oauthCodes  OAuthCode[]
+  oauthTokens OAuthToken[]
 }
 
 model Session {
@@ -163,4 +165,58 @@ model NotificationRecipient {
   /// Which notifications this address gets: keys from notifyEvents in src/lib/notify.ts.
   events    String[]
   createdAt DateTime @default(now())
+}
+
+/// An AI app (Claude, ChatGPT and so on) that registered itself to connect to the MCP server at /mcp.
+/// Apps register themselves (RFC 7591), so name and redirect URIs are their own claims.
+model OAuthClient {
+  id               String       @id @default(cuid())
+  clientId         String       @unique
+  /// Set only for apps that asked for a client secret; most AI apps are public clients using PKCE.
+  secretHash       String?
+  name             String
+  redirectUris     String[]
+  /// "none", "client_secret_post" or "client_secret_basic".
+  tokenAuthMethod  String       @default("none")
+  createdAt        DateTime     @default(now())
+  codes            OAuthCode[]
+  tokens           OAuthToken[]
+}
+
+/// A one-time authorization code, handed to the app after she approves it on /oauth/authorize.
+model OAuthCode {
+  id            String      @id @default(cuid())
+  codeHash      String      @unique
+  clientId      String
+  client        OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  redirectUri   String
+  codeChallenge String
+  scope         String
+  resource      String
+  expiresAt     DateTime
+  usedAt        DateTime?
+  createdAt     DateTime    @default(now())
+}
+
+/// An app's access to her account: a short-lived access token and a longer-lived refresh token.
+/// Refreshing replaces both. Revoking (from /concierge/assistant) cuts the app off.
+model OAuthToken {
+  id               String      @id @default(cuid())
+  accessHash       String      @unique
+  refreshHash      String      @unique
+  clientId         String
+  client           OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  userId           String
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scope            String
+  resource         String
+  accessExpiresAt  DateTime
+  refreshExpiresAt DateTime
+  lastUsedAt       DateTime?
+  revokedAt        DateTime?
+  createdAt        DateTime    @default(now())
+
+  @@index([userId])
 }

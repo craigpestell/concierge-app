@@ -3,14 +3,14 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { brand } from "@/lib/brand";
+import { addTimeOff as saveTimeOff, HOUR_STEPS, removeTimeOff as deleteTimeOff, setWeeklyHours, tryEdit, WEEKDAYS } from "@/lib/site-edits";
 import { dayLabel } from "@/lib/format";
 import { myProfile } from "@/lib/my-profile";
-import { addDays, isValidDate, localDate, minutesLabel, zonedToInstant } from "@/lib/time";
+import { localDate, minutesLabel } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Hours & time off" };
 
-const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const TIMES = Array.from({ length: 31 }, (_, i) => 6 * 60 + i * 30); // 6 am to 9 pm
+const TIMES = HOUR_STEPS; // 6 am to 9 pm
 const HERE = "/concierge/availability";
 
 async function saveHours(f: FormData) {
@@ -19,17 +19,10 @@ async function saveHours(f: FormData) {
   const rows: { weekday: number; startMin: number; endMin: number }[] = [];
   for (let d = 0; d < 7; d++) {
     if (!f.get(`on-${d}`)) continue;
-    const startMin = Number(f.get(`start-${d}`));
-    const endMin = Number(f.get(`end-${d}`));
-    if (!TIMES.includes(startMin) || !TIMES.includes(endMin) || endMin <= startMin) {
-      redirect(`${HERE}?error=${encodeURIComponent(`${WEEKDAYS[d]}: the end time must be after the start time.`)}#hours`);
-    }
-    rows.push({ weekday: d, startMin, endMin });
+    rows.push({ weekday: d, startMin: Number(f.get(`start-${d}`)), endMin: Number(f.get(`end-${d}`)) });
   }
-  await db.$transaction([
-    db.availability.deleteMany({ where: { conciergeId: profile.id } }),
-    db.availability.createMany({ data: rows.map((r) => ({ ...r, conciergeId: profile.id })) }),
-  ]);
+  const error = await tryEdit(() => setWeeklyHours(profile.id, rows));
+  if (error) redirect(`${HERE}?error=${encodeURIComponent(error)}#hours`);
   revalidatePath(HERE);
   redirect(`${HERE}?saved=hours#hours`);
 }
@@ -37,24 +30,15 @@ async function saveHours(f: FormData) {
 async function addTimeOff(f: FormData) {
   "use server";
   const { profile } = await myProfile(HERE);
-  const from = String(f.get("from") ?? "");
-  const to = String(f.get("to") ?? "") || from;
-  if (!isValidDate(from) || !isValidDate(to) || to < from) redirect(`${HERE}?error=${encodeURIComponent("Choose a start date and an end date on or after it.")}#timeoff`);
-  await db.timeOff.create({
-    data: {
-      conciergeId: profile.id,
-      start: zonedToInstant(from, 0, brand.timeZone),
-      end: zonedToInstant(addDays(to, 1), 0, brand.timeZone),
-      note: String(f.get("note") ?? "").trim().slice(0, 140) || null,
-    },
-  });
+  const error = await tryEdit(() => saveTimeOff(profile.id, String(f.get("from") ?? ""), String(f.get("to") ?? ""), String(f.get("note") ?? "")));
+  if (error) redirect(`${HERE}?error=${encodeURIComponent(error)}#timeoff`);
   redirect(`${HERE}?saved=timeoff#timeoff`);
 }
 
 async function removeTimeOff(f: FormData) {
   "use server";
   const { profile } = await myProfile(HERE);
-  await db.timeOff.deleteMany({ where: { id: String(f.get("id")), conciergeId: profile.id } });
+  await tryEdit(() => deleteTimeOff(profile.id, String(f.get("id"))));
   revalidatePath(HERE);
 }
 

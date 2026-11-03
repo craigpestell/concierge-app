@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { slugify } from "@/lib/format";
+import { addService as saveService, setServiceActive, tryEdit } from "@/lib/site-edits";
 
 export const metadata: Metadata = { title: "Services" };
 
@@ -11,21 +11,14 @@ const admin = () => requireUser(["ADMIN"], "/admin/services");
 async function addService(f: FormData) {
   "use server";
   await admin();
-  const name = String(f.get("name") ?? "").trim().slice(0, 60);
-  if (!name) return;
-  const max = await db.service.aggregate({ _max: { sort: true } });
-  await db.service.upsert({
-    where: { slug: slugify(name) },
-    update: { active: true, name },
-    create: { name, slug: slugify(name), sort: (max._max.sort ?? 0) + 1 },
-  });
+  await tryEdit(() => saveService(String(f.get("name") ?? "")));
   revalidatePath("/admin/services");
 }
 
 async function toggleService(f: FormData) {
   "use server";
   await admin();
-  await db.service.update({ where: { id: String(f.get("id")) }, data: { active: f.get("active") === "true" } });
+  await tryEdit(() => setServiceActive(String(f.get("id")), f.get("active") === "true"));
   revalidatePath("/admin/services");
 }
 

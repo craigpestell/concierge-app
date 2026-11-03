@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import { db } from "@/lib/db";
 import { brand } from "@/lib/brand";
 import { myProfile as mine } from "@/lib/my-profile";
-import { PROVIDERS, formatPhone, normalizePhone, providerGuide, telHref } from "@/lib/phone";
+import { PROVIDERS, formatPhone, providerGuide, telHref } from "@/lib/phone";
+import { clearBusinessPhone, setBusinessPhone, tryEdit } from "@/lib/site-edits";
 
 export const metadata: Metadata = { title: "Business phone" };
 
@@ -16,21 +15,15 @@ async function savePhone(f: FormData) {
   const profile = await myProfile();
   const provider = String(f.get("provider") ?? "");
   const back = `/concierge/phone${providerGuide(provider) ? `?provider=${provider}` : ""}`;
-  const phone = normalizePhone(String(f.get("phone") ?? ""));
-  if (!phone) redirect(`${back}${back.includes("?") ? "&" : "?"}error=${encodeURIComponent("Enter the full 10-digit number, for example 778-555-0142.")}#save`);
-  await db.conciergeProfile.update({
-    where: { id: profile.id },
-    data: { businessPhone: phone, phoneProvider: providerGuide(provider) ? provider : "other" },
-  });
-  revalidatePath("/", "layout");
+  const error = await tryEdit(() => setBusinessPhone(profile.id, String(f.get("phone") ?? ""), provider));
+  if (error) redirect(`${back}${back.includes("?") ? "&" : "?"}error=${encodeURIComponent(error)}#save`);
   redirect("/concierge/phone?saved=1#save");
 }
 
 async function clearPhone() {
   "use server";
   const profile = await myProfile();
-  await db.conciergeProfile.update({ where: { id: profile.id }, data: { businessPhone: null, phoneProvider: null } });
-  revalidatePath("/", "layout");
+  await clearBusinessPhone(profile.id);
   redirect("/concierge/phone#save");
 }
 
